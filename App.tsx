@@ -14,8 +14,6 @@ import { HistoryModal } from './components/HistoryModal';
 import { useDarkMode } from './hooks/useDarkMode';
 import { useI18n } from './contexts/i18nContext';
 import { EducationalModal } from './components/EducationalModal';
-import { InstallPWAButton } from './components/InstallPWAButton';
-import { usePWAInstall } from './hooks/usePWAInstall';
 
 interface ToastState {
   message: string;
@@ -41,8 +39,6 @@ const App: React.FC = () => {
   const [isEducationalModalOpen, setIsEducationalModalOpen] = useState(false);
   const [educationalContent, setEducationalContent] = useState<EducationalContent | null>(null);
   const [isEducationalContentLoading, setIsEducationalContentLoading] = useState(false);
-
-  const { showInstallBanner, platform, handleInstall, handleDismiss } = usePWAInstall();
 
   const historyButtonRef = useRef<HTMLButtonElement>(null);
   const prevIsHistoryOpen = useRef(isHistoryOpen);
@@ -260,13 +256,6 @@ const App: React.FC = () => {
           )}
         </div>
       </main>
-      {showInstallBanner && (
-        <InstallPWAButton 
-            platform={platform}
-            onInstall={handleInstall} 
-            onDismiss={handleDismiss}
-        />
-      )}
     </div>
   );
 };

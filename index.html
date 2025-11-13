@@ -5,18 +5,6 @@
     <link rel="icon" href="/icon.svg" type="image/svg+xml" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     
-    <!-- PWA Manifest -->
-    <link rel="manifest" href="/manifest.json" />
-
-    <!-- Theme Color for browsers -->
-    <meta name="theme-color" content="#22c55e" />
-
-    <!-- Apple-specific PWA tags -->
-    <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-    <meta name="apple-mobile-web-app-title" content="EcoSort" />
-    <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
-
     <title>EcoSort | Classificador de Resíduos Inteligente</title>
     <meta name="description" content="Envie a foto de um item a ser descartado, e o EcoSort identificará o tipo de resíduo e sugerirá o melhor método de descarte.">
 
@@ -50,7 +38,6 @@
               'fade-in': 'fadeIn 0.5s ease-in-out forwards',
               'slide-in-right': 'slideInRight 0.5s ease-out forwards',
               'slide-up-fade': 'slideUpFade 0.5s ease-out forwards',
-              'slide-down-fade': 'slideDownFade 0.5s ease-out forwards',
             },
             keyframes: {
               fadeIn: {
@@ -63,10 +50,6 @@
               },
               slideUpFade: {
                 '0%': { transform: 'translateY(10px)', opacity: '0' },
-                '100%': { transform: 'translateY(0)', opacity: '1' },
-              },
-              slideDownFade: {
-                '0%': { transform: 'translateY(-20px)', opacity: '0' },
                 '100%': { transform: 'translateY(0)', opacity: '1' },
               },
             }
@@ -88,20 +71,5 @@
   <body class="bg-brand-light dark:bg-gray-900">
     <div id="root"></div>
     <script type="module" src="/index.tsx"></script>
-
-    <!-- Service Worker Registration -->
-    <script>
-      if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-          navigator.serviceWorker.register('/sw.js')
-            .then(registration => {
-              console.log('Service Worker registered with scope:', registration.scope);
-            })
-            .catch(error => {
-              console.error('Service Worker registration failed:', error);
-            });
-        });
-      }
-    </script>
   </body>
 </html>
