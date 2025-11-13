@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useI18n } from '../contexts/i18nContext';
 import { ArrowDownTrayIcon, XCircleIcon, ShareIcon } from './Icons';
@@ -16,7 +15,7 @@ export const InstallPWAButton: React.FC<InstallPWAButtonProps> = ({ platform, on
 
     return (
         <div 
-            className="fixed bottom-4 left-1/2 -translate-x-1/2 w-[95%] max-w-md z-50 bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-4 border border-gray-200 dark:border-gray-700 animate-slide-up-fade"
+            className="fixed top-4 left-1/2 -translate-x-1/2 w-[95%] max-w-md z-50 bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-4 border border-gray-200 dark:border-gray-700 animate-slide-down-fade"
             role="dialog"
             aria-labelledby="pwa-install-title"
             aria-describedby="pwa-install-description"
