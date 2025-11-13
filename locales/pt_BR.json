@@ -1,0 +1,81 @@
+
+{
+  "header": {
+    "subtitle": "Classificador de Resíduos",
+    "history": "Histórico",
+    "toggleTheme": "Mudar para modo {theme}"
+  },
+  "app": {
+    "imageAnalysis": "Análise por Imagem",
+    "textQuery": "Consulta por Texto",
+    "analyzingButton": "Analisando...",
+    "analyzeButton": "Analisar"
+  },
+  "toast": {
+    "fileTooLarge": "O arquivo de imagem é muito grande. Por favor, escolha um menor que 4MB.",
+    "selectImage": "Por favor, selecione uma imagem primeiro.",
+    "enterQuestion": "Por favor, digite sua pergunta.",
+    "analysisFailed": "Falha na análise",
+    "unknownError": "Ocorreu um erro desconhecido."
+  },
+  "imageUploader": {
+    "title": "1. Envie uma foto do seu resíduo",
+    "dragDrop": "Clique para enviar ou arraste a imagem",
+    "fileTypes": "PNG, JPG ou WEBP (Max. 4MB)",
+    "clearAriaLabel": "Limpar imagem"
+  },
+  "textQuery": {
+    "title": "1. Faça uma pergunta sobre descarte",
+    "placeholder": "Ex: Como descartar pilhas de bateria?",
+    "ariaLabel": "Caixa de texto para pergunta sobre descarte",
+    "clearAriaLabel": "Limpar texto",
+    "examples": {
+      "title": "Outros exemplos:",
+      "ex1": "Garrafas de vidro são recicláveis?",
+      "ex2": "Onde posso jogar fora óleo de cozinha?",
+      "ex3": "Isopor tem reciclagem?"
+    }
+  },
+  "analysis": {
+    "title": "2. Resultado da Análise",
+    "spinnerTitle": "Analisando...",
+    "spinnerSubtitle": "A IA está trabalhando na sua solicitação.",
+    "recyclable": "Reciclável",
+    "notRecyclable": "Não Reciclável",
+    "itemIdentified": "Item Identificado",
+    "disposalSuggestion": "Sugestão de Descarte",
+    "aiReasoning": "Justificativa da IA",
+    "didYouKnow": "Você Sabia?",
+    "yourQuestion": "Sua Pergunta",
+    "aiAnswer": "Resposta da IA",
+    "emptyState": {
+      "ready": {
+        "title": "Pronto para análise!",
+        "description": "Clique no botão \"Analisar\" para que a IA processe sua solicitação."
+      },
+      "image": {
+        "title": "Aguardando imagem",
+        "description": "Envie uma foto do item que você deseja descartar para começar."
+      },
+      "text": {
+        "title": "Aguardando pergunta",
+        "description": "Digite sua dúvida sobre descarte no campo ao lado."
+      }
+    }
+  },
+  "history": {
+    "title": "Histórico de Análises",
+    "closeAriaLabel": "Fechar modal",
+    "empty": {
+      "title": "Nenhuma análise no histórico.",
+      "subtitle": "Suas futuras análises aparecerão aqui."
+    },
+    "clearButton": "Limpar Histórico"
+  },
+  "gemini": {
+    "imagePrompt": "Analise esta imagem de um item a ser descartado. Identifique o item, classifique o tipo de resíduo, forneça uma recomendação de descarte e um fato sobre seu impacto ambiental. Responda em português do Brasil.",
+    "textPrompt": "Você é um especialista em sustentabilidade e reciclagem. Responda à seguinte pergunta de um usuário sobre descarte de resíduos. Pergunta: \"{query}\". Forneça uma resposta direta, uma sugestão clara de descarte, e um fato de impacto ambiental relacionado. Responda em português do Brasil.",
+    "imageError": "Falha ao comunicar com o serviço de análise de imagem.",
+    "textError": "Falha ao comunicar com o serviço de análise de texto."
+  }
+}

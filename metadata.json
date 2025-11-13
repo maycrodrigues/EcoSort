@@ -1,0 +1,5 @@
+{
+  "name": "EcoSort",
+  "description": "Upload a photo of an item to be discarded, and this app will identify the type of waste and suggest the best disposal method.",
+  "requestFramePermissions": []
+}
