@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { useLocalStorage } from '../hooks/useLocalStorage';
 
@@ -78,6 +79,14 @@ const translations = {
     "educationalModal": {
       "title": "Saiba Mais",
       "loading": "Buscando mais informações..."
+    },
+    "pwaInstall": {
+      "title": "Instale o EcoSort!",
+      "description": "Adicione à sua tela inicial para acesso rápido e offline.",
+      "installButton": "Instalar",
+      "dismissButton": "Agora não",
+      "iosTitle": "Para instalar o EcoSort",
+      "iosDescription": "Toque no ícone de Compartilhar e depois em 'Adicionar à Tela de Início'."
     },
     "gemini": {
       "imagePrompt": "Analise esta imagem. Identifique TODOS os itens descartáveis visíveis. Para cada item, forneça seu nome, tipo de lixo, se é reciclável, uma sugestão de descarte, uma justificativa e um fato de impacto ambiental. Retorne um objeto JSON com uma chave 'items' contendo um array de objetos, um para cada item. Se nenhum item for identificado, retorne um array vazio. Responda em português do Brasil.",
@@ -163,6 +172,14 @@ const translations = {
       "title": "Learn More",
       "loading": "Fetching more information..."
     },
+    "pwaInstall": {
+      "title": "Install EcoSort!",
+      "description": "Add to your home screen for quick, offline access.",
+      "installButton": "Install",
+      "dismissButton": "Not now",
+      "iosTitle": "To install EcoSort",
+      "iosDescription": "Tap the Share icon and then 'Add to Home Screen'."
+    },
     "gemini": {
       "imagePrompt": "Analyze this image. Identify ALL visible disposable items. For each item, provide its name, waste type, if it's recyclable, a disposal suggestion, a reasoning, and an environmental impact fact. Return a JSON object with a key 'items' containing an array of objects, one for each item. If no items are identified, return an empty array. Respond in English.",
       "textPrompt": "You are an expert in sustainability and recycling. Answer the following user question about waste disposal. Question: \"{query}\". Provide a direct answer, a clear disposal suggestion, and a related environmental impact fact. Respond in English.",
@@ -247,6 +264,14 @@ const translations = {
       "title": "Aprende Más",
       "loading": "Obteniendo más información..."
     },
+    "pwaInstall": {
+      "title": "¡Instala EcoSort!",
+      "description": "Añade a tu pantalla de inicio para un acceso rápido y sin conexión.",
+      "installButton": "Instalar",
+      "dismissButton": "Ahora no",
+      "iosTitle": "Para instalar EcoSort",
+      "iosDescription": "Toca el ícono de Compartir y luego 'Añadir a la pantalla de inicio'."
+    },
     "gemini": {
       "imagePrompt": "Analiza esta imagen. Identifica TODOS los artículos desechables visibles. Para cada artículo, proporciona su nombre, tipo de residuo, si es reciclable, una sugerencia de eliminación, un razonamiento y un dato de impacto ambiental. Devuelve un objeto JSON con una clave 'items' que contenga un array de objetos, uno para cada artículo. Si no se identifican artículos, devuelve un array vacío. Responde en español.",
       "textPrompt": "Eres un experto en sostenibilidad y reciclaje. Responde la siguiente pregunta del usuario sobre la eliminación de residuos. Pregunta: \"{query}\". Proporciona una respuesta directa, una sugerencia clara de eliminación y un dato de impacto ambiental relacionado. Responde en español.",
@@ -330,6 +355,14 @@ const translations = {
     "educationalModal": {
       "title": "了解更多",
       "loading": "正在获取更多信息..."
+    },
+    "pwaInstall": {
+      "title": "安装 EcoSort！",
+      "description": "添加到主屏幕以便快速、离线访问。",
+      "installButton": "安装",
+      "dismissButton": "以后再说",
+      "iosTitle": "要安装 EcoSort",
+      "iosDescription": "点击分享图标，然后点击“添加到主屏幕”。"
     },
     "gemini": {
       "imagePrompt": "分析这张图片。识别所有可见的可丢弃物品。对于每个物品，提供其名称、废物类型、是否可回收、处理建议、原因和环境影响事实。返回一个JSON对象，其中包含一个'items'键，该键包含一个对象数组，每个对象对应一个物品。如果未识别到任何物品，则返回一个空数组。用中文回答。",
