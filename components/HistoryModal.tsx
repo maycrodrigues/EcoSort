@@ -1,4 +1,3 @@
-
 import React, { useEffect, useRef } from 'react';
 import type { HistoryItem } from '../types';
 import { PhotoIcon, ChatBubbleLeftRightIcon, TrashIcon, XCircleIcon } from './Icons';
@@ -73,12 +72,14 @@ export const HistoryModal: React.FC<HistoryModalProps> = ({ isOpen, onClose, his
       if (e.key === 'Tab') {
         if (e.shiftKey) { // Shift+Tab
           if (document.activeElement === firstElement) {
-            lastElement?.focus();
+            // FIX: Cast to HTMLElement to ensure 'focus' method is available.
+            (lastElement as HTMLElement)?.focus();
             e.preventDefault();
           }
         } else { // Tab
           if (document.activeElement === lastElement) {
-            firstElement?.focus();
+            // FIX: Cast to HTMLElement to ensure 'focus' method is available.
+            (firstElement as HTMLElement)?.focus();
             e.preventDefault();
           }
         }
@@ -86,7 +87,8 @@ export const HistoryModal: React.FC<HistoryModalProps> = ({ isOpen, onClose, his
     };
 
     document.addEventListener('keydown', handleKeyDown);
-    firstElement?.focus();
+    // FIX: Cast to HTMLElement to ensure 'focus' method is available.
+    (firstElement as HTMLElement)?.focus();
 
     return () => {
       document.removeEventListener('keydown', handleKeyDown);

@@ -1,4 +1,3 @@
-
 import React, { useEffect, useRef } from 'react';
 import { useI18n } from '../contexts/i18nContext';
 import { XCircleIcon } from './Icons';
@@ -49,12 +48,14 @@ export const EducationalModal: React.FC<EducationalModalProps> = ({ isOpen, onCl
       if (e.key === 'Tab') {
         if (e.shiftKey) {
           if (document.activeElement === firstElement) {
-            lastElement?.focus();
+            // FIX: Cast to HTMLElement to ensure 'focus' method is available.
+            (lastElement as HTMLElement)?.focus();
             e.preventDefault();
           }
         } else {
           if (document.activeElement === lastElement) {
-            firstElement?.focus();
+            // FIX: Cast to HTMLElement to ensure 'focus' method is available.
+            (firstElement as HTMLElement)?.focus();
             e.preventDefault();
           }
         }
