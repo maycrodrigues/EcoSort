@@ -114,7 +114,7 @@ export const analyzeImage = async (base64Image: string, mimeType: string, i18n: 
         return { queryType: 'image', items: [] };
 
     } catch (error) {
-        console.error("Error calling Gemini API for image analysis:", error);
+        console.error("Gemini API image analysis failed. Full error details:", error);
         throw new Error(i18n.error);
     }
 };
@@ -139,7 +139,7 @@ export const analyzeTextQuery = async (query: string, i18n: I18nStrings): Promis
         return { ...result, queryType: 'text' };
         
     } catch (error) {
-        console.error("Error calling Gemini API for text query:", error);
+        console.error("Gemini API text query failed. Full error details:", error);
         throw new Error(i18n.error);
     }
 };
@@ -161,7 +161,7 @@ export const getExpandedContent = async (fact: string, i18n: I18nStrings): Promi
         return response.text.trim();
 
     } catch (error) {
-        console.error("Error calling Gemini API for educational content:", error);
+        console.error("Gemini API educational content failed. Full error details:", error);
         throw new Error(i18n.error);
     }
 };

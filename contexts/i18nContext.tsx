@@ -26,7 +26,8 @@ const translations = {
       "selectImage": "Por favor, selecione uma imagem primeiro.",
       "enterQuestion": "Por favor, digite sua pergunta.",
       "analysisFailed": "Falha na análise",
-      "unknownError": "Ocorreu um erro desconhecido."
+      "unknownError": "Ocorreu um erro desconhecido.",
+      "tryAgainLater": "Por favor, tente novamente mais tarde."
     },
     "imageUploader": {
       "title": "1. Envie uma foto do seu resíduo",
@@ -108,7 +109,8 @@ const translations = {
       "selectImage": "Please select an image first.",
       "enterQuestion": "Please enter your question.",
       "analysisFailed": "Analysis failed",
-      "unknownError": "An unknown error occurred."
+      "unknownError": "An unknown error occurred.",
+      "tryAgainLater": "Please try again later."
     },
     "imageUploader": {
       "title": "1. Upload a photo of your waste",

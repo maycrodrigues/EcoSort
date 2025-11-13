@@ -130,9 +130,8 @@ const App: React.FC = () => {
       }
 
     } catch (err) {
-      console.error(err);
       const errorMessage = err instanceof Error ? err.message : t('toast.unknownError');
-      showToast(`${t('toast.analysisFailed')}: ${errorMessage}`, "error");
+      showToast(`${t('toast.analysisFailed')}: ${errorMessage}. ${t('toast.tryAgainLater')}`, "error");
     } finally {
       setIsLoading(false);
       setAnalysisStatus(t('app.ariaLive.complete'));
@@ -150,9 +149,8 @@ const App: React.FC = () => {
       });
       setEducationalContent({ title: fact, content: expandedContent });
     } catch (err) {
-      console.error(err);
       const errorMessage = err instanceof Error ? err.message : t('toast.unknownError');
-      showToast(errorMessage, "error");
+      showToast(`${errorMessage}. ${t('toast.tryAgainLater')}`, "error");
       setIsEducationalModalOpen(false); // Fecha o modal em caso de erro
     } finally {
       setIsEducationalContentLoading(false);
