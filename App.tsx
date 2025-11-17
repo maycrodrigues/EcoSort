@@ -49,6 +49,8 @@ const App: React.FC = () => {
   const [isSyncing, setIsSyncing] = useState(false);
   const [isMapModalOpen, setIsMapModalOpen] = useState(false);
   const [mapLocation, setMapLocation] = useState<LocationState | null>(null);
+  const [isFromHistory, setIsFromHistory] = useState(false);
+  const [historyMimeType, setHistoryMimeType] = useState<string | null>(null);
 
   const isOnline = useOnlineStatus();
   const historyButtonRef = useRef<HTMLButtonElement>(null);
@@ -135,6 +137,7 @@ const App: React.FC = () => {
       const dataUrl = await createImagePreview(file, 400); // Max 400px
       setHistoryImagePreview(dataUrl);
       setAnalysisResult(null);
+      setIsFromHistory(false);
 
       try {
         const gpsData = await getGPSData(file);
@@ -159,6 +162,8 @@ const App: React.FC = () => {
     setIsLoading(false);
     setTextQuery('');
     setLocation(null);
+    setIsFromHistory(false);
+    setHistoryMimeType(null);
     if(clearMode) {
       setMode('image');
     }
@@ -176,6 +181,9 @@ const App: React.FC = () => {
   }
 
   const handleAnalyzeClick = async () => {
+    const isReanalyzing = isFromHistory;
+    setIsFromHistory(false); // Reseta imediatamente para que o botão volte ao normal após a análise.
+
     // Lógica Offline-First
     if (!isOnline) {
       if (mode === 'image' && selectedFile && historyImagePreview) {
@@ -208,21 +216,24 @@ const App: React.FC = () => {
       return;
     }
 
-    // Verifica o cache antes de fazer a chamada à API
-    if (mode === 'image' && historyImagePreview) {
-      if (analysisCache.current.has(historyImagePreview)) {
-        setAnalysisResult(analysisCache.current.get(historyImagePreview)!);
-        showToast(t('toast.loadedFromCache'), 'info');
-        return;
-      }
-    } else if (mode === 'text' && textQuery.trim()) {
-      const queryKey = textQuery.trim();
-      if (analysisCache.current.has(queryKey)) {
-        setAnalysisResult(analysisCache.current.get(queryKey)!);
-        showToast(t('toast.loadedFromCache'), 'info');
-        return;
-      }
+    // Verifica o cache antes de fazer a chamada à API, exceto se for uma reanálise
+    if (!isReanalyzing) {
+        if (mode === 'image' && historyImagePreview) {
+            if (analysisCache.current.has(historyImagePreview)) {
+                setAnalysisResult(analysisCache.current.get(historyImagePreview)!);
+                showToast(t('toast.loadedFromCache'), 'info');
+                return;
+            }
+        } else if (mode === 'text' && textQuery.trim()) {
+            const queryKey = textQuery.trim();
+            if (analysisCache.current.has(queryKey)) {
+                setAnalysisResult(analysisCache.current.get(queryKey)!);
+                showToast(t('toast.loadedFromCache'), 'info');
+                return;
+            }
+        }
     }
+    
 
     // Lógica Online
     setIsLoading(true);
@@ -231,10 +242,30 @@ const App: React.FC = () => {
     
     try {
       if (mode === 'image') {
-        if (!selectedFile || !historyImagePreview) {
-          showToast(t('toast.selectImage'), "error");
-          setIsLoading(false);
-          return;
+        let base64ForAnalysis: string;
+        let mimeTypeForAnalysis: string;
+        let imagePreviewForCache: string;
+
+        // Determina a fonte dos dados da imagem (novo arquivo ou do histórico)
+        if (isReanalyzing) {
+            if (!historyImagePreview || !historyMimeType) {
+              showToast("Error: Missing data for re-analysis.", "error");
+              setIsLoading(false);
+              return;
+            }
+            base64ForAnalysis = historyImagePreview.split(',')[1];
+            mimeTypeForAnalysis = historyMimeType;
+            imagePreviewForCache = historyImagePreview;
+        } else {
+            if (!selectedFile || !historyImagePreview) {
+                showToast(t('toast.selectImage'), "error");
+                setIsLoading(false);
+                return;
+            }
+            const fileData = await fileToBase64(selectedFile);
+            base64ForAnalysis = fileData.base64;
+            mimeTypeForAnalysis = fileData.mimeType;
+            imagePreviewForCache = historyImagePreview;
         }
 
         let locationForAnalysis = location;
@@ -249,9 +280,8 @@ const App: React.FC = () => {
             console.warn("Geolocalização do navegador negada ou indisponível.", geoError);
           }
         }
-
-        const { base64, mimeType } = await fileToBase64(selectedFile);
-        const result = await analyzeImage(base64, mimeType, {
+        
+        const result = await analyzeImage(base64ForAnalysis, mimeTypeForAnalysis, {
           prompt: t('gemini.imagePrompt'),
           locationPrompt: t('gemini.locationPrompt'),
           error: t('gemini.imageError'),
@@ -260,15 +290,15 @@ const App: React.FC = () => {
         if (result) {
           const resultWithLocation: MultiItemAnalysisResult = { ...result, location: locationForAnalysis ?? undefined };
           setAnalysisResult(resultWithLocation);
-          analysisCache.current.set(historyImagePreview, resultWithLocation); // Salva no cache
+          analysisCache.current.set(imagePreviewForCache, resultWithLocation); // Salva no cache
           const newHistoryItem: ImageHistoryItem = {
             id: Date.now().toString(),
             timestamp: new Date().toISOString(),
             queryType: 'image',
             syncStatus: 'synced',
             result: resultWithLocation,
-            imagePreview: historyImagePreview,
-            mimeType: selectedFile.type,
+            imagePreview: imagePreviewForCache,
+            mimeType: mimeTypeForAnalysis,
             location: locationForAnalysis ?? undefined,
           };
           setHistory([newHistoryItem, ...history]);
@@ -330,12 +360,14 @@ const App: React.FC = () => {
   
   const isAnalyzeButtonDisabled = () => {
     if (isLoading || isSyncing) return true;
-    if (mode === 'image') return !selectedFile;
+    if (mode === 'image') return !selectedFile && !imagePreview;
     if (mode === 'text') return !textQuery.trim();
     return true;
   }
   
   const handleSelectHistoryItem = (item: HistoryItem) => {
+    setIsFromHistory(item.syncStatus === 'synced');
+
     if (item.syncStatus === 'pending') {
       showToast(t('toast.history.pending'), 'info');
     } else if (item.syncStatus === 'error') {
@@ -346,6 +378,7 @@ const App: React.FC = () => {
       setMode('image');
       setImagePreview(item.imagePreview);
       setHistoryImagePreview(item.imagePreview);
+      setHistoryMimeType(item.mimeType);
       setAnalysisResult(item.result || null); // Mostra o resultado se estiver sincronizado
       setTextQuery('');
       setSelectedFile(null);
@@ -355,6 +388,7 @@ const App: React.FC = () => {
       setAnalysisResult(item.result || null); // Mostra o resultado se estiver sincronizado
       setImagePreview(null);
       setHistoryImagePreview(null);
+      setHistoryMimeType(null);
       setSelectedFile(null);
     }
     
@@ -443,7 +477,13 @@ const App: React.FC = () => {
                 className="w-full flex items-center justify-center gap-2 px-8 py-4 bg-brand-green hover:bg-green-600 text-white font-bold rounded-full shadow-lg transition-all duration-300 transform hover:scale-105 disabled:bg-green-300 disabled:cursor-not-allowed disabled:transform-none focus:outline-none focus:ring-4 focus:ring-green-300"
             >
                 <SparklesIcon className="w-6 h-6" />
-                <span className="text-lg">{isLoading ? t('app.analyzingButton') : t('app.analyzeButton')}</span>
+                <span className="text-lg">
+                    {isLoading 
+                        ? t('app.analyzingButton') 
+                        : isFromHistory 
+                        ? t('app.reanalyzeButton') 
+                        : t('app.analyzeButton')}
+                </span>
             </button>
           </div>
 

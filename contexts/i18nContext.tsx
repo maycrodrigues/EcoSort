@@ -18,6 +18,7 @@ const translations = {
       "textQuery": "Consulta por Texto",
       "analyzingButton": "Analisando...",
       "analyzeButton": "Analisar",
+      "reanalyzeButton": "Reanalisar",
       "ariaLive": {
         "loading": "Analisando...",
         "complete": "Análise concluída."
@@ -129,6 +130,7 @@ const translations = {
       "textQuery": "Text Query",
       "analyzingButton": "Analyzing...",
       "analyzeButton": "Analyze",
+      "reanalyzeButton": "Reanalyze",
       "ariaLive": {
         "loading": "Analyzing...",
         "complete": "Analysis complete."
@@ -240,6 +242,7 @@ const translations = {
       "textQuery": "Consulta de Texto",
       "analyzingButton": "Analizando...",
       "analyzeButton": "Analizar",
+      "reanalyzeButton": "Reanalizar",
       "ariaLive": {
         "loading": "Analizando...",
         "complete": "Análisis completo."
@@ -351,6 +354,7 @@ const translations = {
       "textQuery": "文本查询",
       "analyzingButton": "分析中...",
       "analyzeButton": "分析",
+      "reanalyzeButton": "重新分析",
       "ariaLive": {
         "loading": "分析中...",
         "complete": "分析完成。"
