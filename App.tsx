@@ -1,4 +1,5 @@
 
+
 import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { Header } from './components/Header';
 import { ImageUploader } from './components/ImageUploader';
@@ -6,7 +7,7 @@ import { AnalysisDisplay } from './components/AnalysisDisplay';
 import { analyzeImage, analyzeTextQuery, getExpandedContent } from './services/geminiService';
 import { fileToBase64, createImagePreview } from './utils/fileUtils';
 import { getGPSData } from './utils/exifUtils';
-import type { AnalysisResult, HistoryItem, EducationalContent, ImageHistoryItem, TextHistoryItem } from './types';
+import type { AnalysisResult, HistoryItem, EducationalContent, ImageHistoryItem, TextHistoryItem, LocationState, MultiItemAnalysisResult } from './types';
 import { SparklesIcon, PhotoIcon, ChatBubbleLeftRightIcon } from './components/Icons';
 import { Toast } from './components/Toast';
 import { TextQueryInput } from './components/TextQueryInput';
@@ -17,15 +18,11 @@ import { useI18n } from './contexts/i18nContext';
 import { EducationalModal } from './components/EducationalModal';
 import { useOnlineStatus } from './hooks/useOnlineStatus';
 import { ConnectionStatusBanner } from './components/ConnectionStatusBanner';
+import { MapModal } from './components/MapModal';
 
 interface ToastState {
   message: string;
   type: 'error' | 'info';
-}
-
-interface LocationState {
-  lat: number;
-  lon: number;
 }
 
 type AnalysisMode = 'image' | 'text';
@@ -50,6 +47,8 @@ const App: React.FC = () => {
   const [isEducationalContentLoading, setIsEducationalContentLoading] = useState(false);
   const [location, setLocation] = useState<LocationState | null>(null);
   const [isSyncing, setIsSyncing] = useState(false);
+  const [isMapModalOpen, setIsMapModalOpen] = useState(false);
+  const [mapLocation, setMapLocation] = useState<LocationState | null>(null);
 
   const isOnline = useOnlineStatus();
   const historyButtonRef = useRef<HTMLButtonElement>(null);
@@ -82,22 +81,18 @@ const App: React.FC = () => {
           }
 
           try {
-            // FIX: The `result` variable is now scoped within the type-guarded blocks
-            // to ensure TypeScript can correctly infer the types. This resolves the
-            // conflict where a general `AnalysisResult` was being assigned to
-            // specific `ImageHistoryItem` or `TextHistoryItem` types.
             if (item.queryType === 'image') {
               const base64 = item.imagePreview.split(',')[1];
               const result = await analyzeImage(base64, item.mimeType, {
                 prompt: t('gemini.imagePrompt'),
                 locationPrompt: t('gemini.locationPrompt'),
                 error: t('gemini.imageError'),
-              }, null); // Não temos localização para itens offline
+              }, item.location || null); 
               
               if (result) {
-                return { ...item, result, syncStatus: 'synced' as const };
+                const resultWithLocation: MultiItemAnalysisResult = { ...result, location: item.location };
+                return { ...item, result: resultWithLocation, syncStatus: 'synced' as const };
               }
-              // Se a API retornar nulo, marca como erro
               return { ...item, syncStatus: 'error' as const };
             } else { // text
               const result = await analyzeTextQuery(item.originalQuery, {
@@ -108,7 +103,6 @@ const App: React.FC = () => {
               if (result) {
                 return { ...item, result, syncStatus: 'synced' as const };
               }
-              // Se a API retornar nulo, marca como erro
               return { ...item, syncStatus: 'error' as const };
             }
           } catch (error) {
@@ -192,6 +186,7 @@ const App: React.FC = () => {
           syncStatus: 'pending',
           imagePreview: historyImagePreview,
           mimeType: selectedFile.type,
+          location: location ?? undefined,
         };
         setHistory([newHistoryItem, ...history]);
         showToast(t('toast.offline.queued'), 'info');
@@ -263,16 +258,18 @@ const App: React.FC = () => {
         }, locationForAnalysis);
 
         if (result) {
-          setAnalysisResult(result);
-          analysisCache.current.set(historyImagePreview, result); // Salva no cache
+          const resultWithLocation: MultiItemAnalysisResult = { ...result, location: locationForAnalysis ?? undefined };
+          setAnalysisResult(resultWithLocation);
+          analysisCache.current.set(historyImagePreview, resultWithLocation); // Salva no cache
           const newHistoryItem: ImageHistoryItem = {
             id: Date.now().toString(),
             timestamp: new Date().toISOString(),
             queryType: 'image',
             syncStatus: 'synced',
-            result,
+            result: resultWithLocation,
             imagePreview: historyImagePreview,
             mimeType: selectedFile.type,
+            location: locationForAnalysis ?? undefined,
           };
           setHistory([newHistoryItem, ...history]);
         }
@@ -368,6 +365,11 @@ const App: React.FC = () => {
     setHistory([]);
     setIsHistoryOpen(false);
   };
+
+  const handleShowOnMap = (locationToShow: LocationState) => {
+    setMapLocation(locationToShow);
+    setIsMapModalOpen(true);
+  };
   
   const shouldShowAnalysisPanel = isLoading || analysisResult !== null;
 
@@ -396,6 +398,11 @@ const App: React.FC = () => {
         onClose={() => setIsEducationalModalOpen(false)}
         content={educationalContent}
         isLoading={isEducationalContentLoading}
+      />
+      <MapModal
+        isOpen={isMapModalOpen}
+        onClose={() => setIsMapModalOpen(false)}
+        location={mapLocation}
       />
       <main className="flex-grow container mx-auto p-4 md:p-8 w-full">
         <div className={`grid grid-cols-1 ${shouldShowAnalysisPanel ? 'lg:grid-cols-2' : 'lg:grid-cols-1'} gap-8 items-start transition-all duration-500`}>
@@ -447,6 +454,7 @@ const App: React.FC = () => {
                   result={analysisResult}
                   isLoading={isLoading}
                   onLearnMore={handleLearnMore}
+                  onShowOnMap={handleShowOnMap}
                 />
             </div>
           )}

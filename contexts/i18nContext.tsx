@@ -1,4 +1,5 @@
 
+
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { useLocalStorage } from '../hooks/useLocalStorage';
 
@@ -80,7 +81,8 @@ const translations = {
       "didYouKnow": "Você Sabia?",
       "yourQuestion": "Sua Pergunta",
       "aiAnswer": "Resposta",
-      "learnMore": "Clique para saber mais"
+      "learnMore": "Clique para saber mais",
+      "showOnMapAriaLabel": "Mostrar localização no mapa"
     },
     "history": {
       "title": "Histórico de Análises",
@@ -100,6 +102,10 @@ const translations = {
     "educationalModal": {
       "title": "Saiba Mais",
       "loading": "Buscando mais informações..."
+    },
+    "mapModal": {
+      "title": "Localização da Análise",
+      "closeAriaLabel": "Fechar mapa"
     },
     "gemini": {
       "imagePrompt": "Analise esta imagem. Identifique TODOS os itens descartáveis visíveis. Para cada item, forneça seu nome, tipo de lixo, se é reciclável, uma sugestão de descarte, uma justificativa e um fato de impacto ambiental. Retorne um objeto JSON com uma chave 'items' contendo um array de objetos, um para cada item. Se nenhum item for identificado, retorne um array vazio. Responda em português do Brasil.",
@@ -186,7 +192,8 @@ const translations = {
       "didYouKnow": "Did You Know?",
       "yourQuestion": "Your Question",
       "aiAnswer": "Answer",
-      "learnMore": "Click to learn more"
+      "learnMore": "Click to learn more",
+      "showOnMapAriaLabel": "Show location on map"
     },
     "history": {
       "title": "Analysis History",
@@ -206,6 +213,10 @@ const translations = {
     "educationalModal": {
       "title": "Learn More",
       "loading": "Fetching more information..."
+    },
+     "mapModal": {
+      "title": "Analysis Location",
+      "closeAriaLabel": "Close map"
     },
     "gemini": {
       "imagePrompt": "Analyze this image. Identify ALL visible disposable items. For each item, provide its name, waste type, if it's recyclable, a disposal suggestion, a reasoning, and an environmental impact fact. Return a JSON object with a key 'items' containing an array of objects, one for each item. If no items are identified, return an empty array. Respond in English.",
@@ -292,7 +303,8 @@ const translations = {
       "didYouKnow": "¿Sabías que?",
       "yourQuestion": "Tu Pregunta",
       "aiAnswer": "Respuesta",
-      "learnMore": "Haz clic para saber más"
+      "learnMore": "Haz clic para saber más",
+      "showOnMapAriaLabel": "Mostrar ubicación en el mapa"
     },
     "history": {
       "title": "Historial de Análisis",
@@ -312,6 +324,10 @@ const translations = {
     "educationalModal": {
       "title": "Aprende Más",
       "loading": "Obteniendo más información..."
+    },
+    "mapModal": {
+      "title": "Ubicación del Análisis",
+      "closeAriaLabel": "Cerrar mapa"
     },
     "gemini": {
       "imagePrompt": "Analiza esta imagen. Identifica TODOS los artículos desechables visibles. Para cada artículo, proporciona su nombre, tipo de residuo, si es reciclable, una sugerencia de eliminación, un razonamiento y un dato de impacto ambiental. Devuelve un objeto JSON con una clave 'items' que contenga un array de objetos, uno para cada artículo. Si no se identifican artículos, devuelve un array vacío. Responde en español.",
@@ -398,7 +414,8 @@ const translations = {
       "didYouKnow": "您知道吗？",
       "yourQuestion": "您的问题",
       "aiAnswer": "回答",
-      "learnMore": "点击了解更多"
+      "learnMore": "点击了解更多",
+      "showOnMapAriaLabel": "在地图上显示位置"
     },
     "history": {
       "title": "分析历史",
@@ -418,6 +435,10 @@ const translations = {
     "educationalModal": {
       "title": "了解更多",
       "loading": "正在获取更多信息..."
+    },
+    "mapModal": {
+      "title": "分析位置",
+      "closeAriaLabel": "关闭地图"
     },
     "gemini": {
       "imagePrompt": "分析这张图片。识别所有可见的可丢弃物品。对于每个物品，提供其名称、废物类型、是否可回收、处理建议、原因和环境影响事实。返回一个JSON对象，其中包含一个'items'键，该键包含一个对象数组，每个对象对应一个物品。如果未识别到任何物品，则返回一个空数组。用中文回答。",

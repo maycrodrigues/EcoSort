@@ -1,13 +1,15 @@
 
+
 import React from 'react';
-import type { AnalysisResult, MultiItemAnalysisResult, SingleItemAnalysisResult, TextAnalysisResult } from '../types';
-import { CheckCircleIcon, XCircleIcon, InformationCircleIcon, GlobeAltIcon, TrashIcon, ChatBubbleLeftRightIcon, CubeTransparentIcon, BookOpenIcon } from './Icons';
+import type { AnalysisResult, MultiItemAnalysisResult, SingleItemAnalysisResult, TextAnalysisResult, LocationState } from '../types';
+import { CheckCircleIcon, XCircleIcon, InformationCircleIcon, GlobeAltIcon, TrashIcon, ChatBubbleLeftRightIcon, CubeTransparentIcon, BookOpenIcon, MapPinIcon } from './Icons';
 import { useI18n } from '../contexts/i18nContext';
 
 interface AnalysisDisplayProps {
   result: AnalysisResult | null;
   isLoading: boolean;
   onLearnMore: (fact: string) => void;
+  onShowOnMap: (location: LocationState) => void;
 }
 
 const Spinner: React.FC = () => {
@@ -117,7 +119,7 @@ const ItemResultCard: React.FC<{ item: SingleItemAnalysisResult; onLearnMore: (f
 };
 
 
-const ImageResultDisplay: React.FC<{ result: MultiItemAnalysisResult; onLearnMore: (fact: string) => void; }> = ({ result, onLearnMore }) => {
+const ImageResultDisplay: React.FC<{ result: MultiItemAnalysisResult; onLearnMore: (fact: string) => void; onShowOnMap: (location: LocationState) => void; }> = ({ result, onLearnMore, onShowOnMap }) => {
     const { t } = useI18n();
     const itemCount = result.items.length;
 
@@ -130,6 +132,18 @@ const ImageResultDisplay: React.FC<{ result: MultiItemAnalysisResult; onLearnMor
                     : t('analysis.noItemsFound.title')
                 }
             </h3>
+            {result.location && (
+                <button
+                    onClick={() => onShowOnMap(result.location!)}
+                    className="mt-2 flex items-center justify-center gap-2 text-xs text-brand-secondary dark:text-gray-400 rounded-md p-1 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200"
+                    aria-label={t('analysis.showOnMapAriaLabel')}
+                >
+                    <MapPinIcon className="w-4 h-4" />
+                    <span>
+                        {`Lat: ${result.location.lat.toFixed(4)}, Lon: ${result.location.lon.toFixed(4)}`}
+                    </span>
+                </button>
+            )}
         </div>
         
         {itemCount > 0 ? (
@@ -195,7 +209,7 @@ const TextResultDisplay: React.FC<{ result: TextAnalysisResult; onLearnMore: (fa
     </div>
 )};
 
-export const AnalysisDisplay: React.FC<AnalysisDisplayProps> = ({ result, isLoading, onLearnMore }) => {
+export const AnalysisDisplay: React.FC<AnalysisDisplayProps> = ({ result, isLoading, onLearnMore, onShowOnMap }) => {
   const { t } = useI18n();
   const renderContent = () => {
     if (isLoading) {
@@ -204,7 +218,7 @@ export const AnalysisDisplay: React.FC<AnalysisDisplayProps> = ({ result, isLoad
     
     if (result) {
         if (result.queryType === 'image') {
-            return <ImageResultDisplay result={result} onLearnMore={onLearnMore} />;
+            return <ImageResultDisplay result={result} onLearnMore={onLearnMore} onShowOnMap={onShowOnMap} />;
         }
         if (result.queryType === 'text') {
             return <TextResultDisplay result={result} onLearnMore={onLearnMore} />;

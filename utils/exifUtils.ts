@@ -1,4 +1,3 @@
-
 // Informa ao TypeScript que a propriedade ExifReader existirá no objeto global window.
 // Isso é necessário porque a biblioteca é carregada via uma tag <script> no HTML.
 declare global {
@@ -11,23 +10,24 @@ declare global {
  * Aguarda a biblioteca ExifReader ficar disponível no objeto window.
  * Isso é necessário porque ela é carregada a partir de uma tag de script externa.
  * @param timeout O tempo máximo de espera em milissegundos.
- * @returns Uma promessa que resolve quando a biblioteca está pronta, ou rejeita no timeout.
+ * @returns Uma promessa que resolve para `true` se a biblioteca carregar, ou `false` em caso de timeout.
  */
-const waitForExifReader = (timeout = 3000): Promise<void> => {
-  return new Promise((resolve, reject) => {
+const waitForExifReader = (timeout = 5000): Promise<boolean> => {
+  return new Promise((resolve) => {
     // Verifica se já está disponível
     if (typeof window.ExifReader !== 'undefined') {
-      return resolve();
+      return resolve(true);
     }
 
     const startTime = Date.now();
     const intervalId = setInterval(() => {
       if (typeof window.ExifReader !== 'undefined') {
         clearInterval(intervalId);
-        resolve();
+        resolve(true);
       } else if (Date.now() - startTime > timeout) {
         clearInterval(intervalId);
-        reject(new Error("A biblioteca ExifReader não carregou dentro do tempo limite."));
+        console.warn(`A biblioteca ExifReader não carregou em ${timeout}ms. Isso pode ser devido a uma conexão de rede lenta. A funcionalidade de geolocalização a partir dos metadados da foto estará indisponível.`);
+        resolve(false);
       }
     }, 100); // Verifica a cada 100ms
   });
@@ -40,13 +40,10 @@ const waitForExifReader = (timeout = 3000): Promise<void> => {
  * @returns Uma promessa que resolve para um objeto com lat e lon, ou null se não houver dados de GPS.
  */
 export const getGPSData = async (file: File): Promise<{ lat: number; lon: number } | null> => {
-  try {
-    // Aguarda a biblioteca carregar, com um tempo limite.
-    await waitForExifReader();
-  } catch (error) {
-    // Isso captura o erro de timeout do waitForExifReader.
-    console.error("A biblioteca ExifReader não está disponível no objeto window. Verifique se ela foi carregada corretamente.", error);
-    return null;
+  const isLibraryLoaded = await waitForExifReader();
+
+  if (!isLibraryLoaded) {
+    return null; // Sai graciosamente se a biblioteca não carregar a tempo.
   }
   
   try {

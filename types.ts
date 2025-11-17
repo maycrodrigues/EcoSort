@@ -1,4 +1,9 @@
 
+export interface LocationState {
+  lat: number;
+  lon: number;
+}
+
 export interface SingleItemAnalysisResult {
   itemName: string;
   wasteType: string;
@@ -11,6 +16,7 @@ export interface SingleItemAnalysisResult {
 export interface MultiItemAnalysisResult {
   queryType: 'image';
   items: SingleItemAnalysisResult[];
+  location?: LocationState;
 }
 
 export interface TextAnalysisResult {
@@ -36,6 +42,7 @@ export interface ImageHistoryItem extends BaseHistoryItem {
   result?: MultiItemAnalysisResult;
   imagePreview: string; // Armazena a imagem como Data URL (base64)
   mimeType: string; // Necessário para a sincronização offline
+  location?: LocationState;
 }
 
 // Item de histórico para uma consulta de texto
