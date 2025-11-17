@@ -15,6 +15,7 @@ interface AnalysisDisplayProps {
     status: 'idle' | 'loading' | 'playing' | 'paused' | 'error';
   };
   onToggleAudio: (itemId: string, textToSpeak: string) => void;
+  onShowToast: (message: string, type: 'info' | 'error') => void;
 }
 
 const Spinner: React.FC<{ small?: boolean }> = ({ small = false }) => {
@@ -103,53 +104,30 @@ const ItemResultCard: React.FC<{
     item: SingleItemAnalysisResult; 
     itemId: string;
     onLearnMore: (fact: string) => void; 
-    audioState: AnalysisDisplayProps['audioState'];
-    onToggleAudio: AnalysisDisplayProps['onToggleAudio'];
-}> = ({ item, itemId, onLearnMore, audioState, onToggleAudio }) => {
+    onShowToast: (message: string, type: 'info' | 'error') => void;
+}> = ({ item, itemId, onLearnMore, onShowToast }) => {
     const { t } = useI18n();
-    
-    const textToSpeak = [
-        item.itemName,
-        `${t('analysis.disposalSuggestion')}: ${item.disposalSuggestion}`,
-        `${t('analysis.aiReasoning')}: ${item.reasoning}`,
-        item.environmentalImpact ? `${t('analysis.didYouKnow')}: ${item.environmentalImpact}` : ''
-    ].filter(Boolean).join('. ');
 
-    const handleToggleClick = () => {
-        onToggleAudio(itemId, textToSpeak);
+    const handleShowComingSoonToast = () => {
+        onShowToast(t('toast.comingSoon'), 'info');
     }
-    
+
     const renderAudioButton = () => {
-        const isCurrentItem = audioState.itemId === itemId;
-
-        if (isCurrentItem && audioState.status === 'loading') {
-            return <Spinner small />;
-        }
-        
-        let Icon;
-        let ariaLabel;
-
-        if (isCurrentItem && audioState.status === 'playing') {
-            Icon = PauseCircleIcon;
-            ariaLabel = t('audio.pauseAriaLabel');
-        } else {
-            Icon = SpeakerWaveIcon;
-            ariaLabel = t('audio.playAriaLabel');
-        }
-        
         return (
             <button 
-                onClick={handleToggleClick}
-                className="p-1.5 rounded-full text-brand-secondary dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600 transition-all hover:scale-110"
-                aria-label={ariaLabel}
+                disabled
+                onMouseEnter={handleShowComingSoonToast}
+                onFocus={handleShowComingSoonToast}
+                className="p-1.5 rounded-full text-brand-secondary dark:text-gray-400 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                aria-label={t('audio.playAriaLabel_item', { itemName: item.itemName })}
             >
-                <Icon className="w-6 h-6" />
+                <SpeakerWaveIcon className="w-6 h-6" />
             </button>
         )
     }
 
     return (
-        <div className="bg-white dark:bg-gray-700/50 p-4 rounded-lg border dark:border-gray-600 flex flex-col gap-3">
+        <div className={`bg-white dark:bg-gray-700/50 p-4 rounded-lg border flex flex-col gap-3 transition-all duration-300 dark:border-gray-600`}>
             <div className="flex justify-between items-start">
                 <h3 className="text-lg font-bold text-brand-dark dark:text-white mr-2">{item.itemName}</h3>
                 {renderAudioButton()}
@@ -188,9 +166,8 @@ const ImageResultDisplay: React.FC<{
     result: MultiItemAnalysisResult; 
     onLearnMore: (fact: string) => void; 
     onShowOnMap: (location: LocationState) => void;
-    audioState: AnalysisDisplayProps['audioState'];
-    onToggleAudio: AnalysisDisplayProps['onToggleAudio'];
-}> = ({ result, onLearnMore, onShowOnMap, audioState, onToggleAudio }) => {
+    onShowToast: (message: string, type: 'info' | 'error') => void;
+}> = ({ result, onLearnMore, onShowOnMap, onShowToast }) => {
     const { t } = useI18n();
     const itemCount = result.items.length;
 
@@ -229,8 +206,7 @@ const ImageResultDisplay: React.FC<{
                             item={item} 
                             itemId={`${item.itemName}-${index}`}
                             onLearnMore={onLearnMore} 
-                            audioState={audioState}
-                            onToggleAudio={onToggleAudio}
+                            onShowToast={onShowToast}
                         />
                     </div>
                 ))}
@@ -286,7 +262,7 @@ const TextResultDisplay: React.FC<{ result: TextAnalysisResult; onLearnMore: (fa
     </div>
 )};
 
-export const AnalysisDisplay: React.FC<AnalysisDisplayProps> = ({ result, isLoading, onLearnMore, onShowOnMap, audioState, onToggleAudio }) => {
+export const AnalysisDisplay: React.FC<AnalysisDisplayProps> = ({ result, isLoading, onLearnMore, onShowOnMap, onShowToast }) => {
   const { t } = useI18n();
   const renderContent = () => {
     if (isLoading) {
@@ -295,7 +271,7 @@ export const AnalysisDisplay: React.FC<AnalysisDisplayProps> = ({ result, isLoad
     
     if (result) {
         if (result.queryType === 'image') {
-            return <ImageResultDisplay result={result} onLearnMore={onLearnMore} onShowOnMap={onShowOnMap} audioState={audioState} onToggleAudio={onToggleAudio} />;
+            return <ImageResultDisplay result={result} onLearnMore={onLearnMore} onShowOnMap={onShowOnMap} onShowToast={onShowToast} />;
         }
         if (result.queryType === 'text') {
             return <TextResultDisplay result={result} onLearnMore={onLearnMore} />;

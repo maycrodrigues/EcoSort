@@ -618,6 +618,7 @@ const App: React.FC = () => {
                   onShowOnMap={handleShowOnMap}
                   audioState={audioState}
                   onToggleAudio={handleToggleAudio}
+                  onShowToast={showToast}
                 />
             </div>
           )}

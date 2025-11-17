@@ -36,6 +36,7 @@ const translations = {
       "locationUsed": "Usando sua localização atual para resultados mais precisos.",
       "loadedFromCache": "Resultado carregado do cache para uma experiência mais rápida!",
       "audioGenerationFailed": "Não foi possível gerar o áudio. Tente novamente.",
+      "comingSoon": "Funcionalidade disponível em breve.",
       "offline": {
         "queued": "Análise adicionada à fila para envio posterior.",
         "noInput": "Nenhuma imagem ou texto para adicionar à fila."
@@ -87,8 +88,8 @@ const translations = {
       "showOnMapAriaLabel": "Mostrar localização no mapa"
     },
     "audio": {
-      "playAriaLabel": "Ouvir descrição",
-      "pauseAriaLabel": "Pausar descrição",
+      "playAriaLabel_item": "Ouvir descrição de {itemName}",
+      "pauseAriaLabel_item": "Pausar descrição de {itemName}",
       "stopAriaLabel": "Parar de ouvir"
     },
     "history": {
@@ -154,6 +155,7 @@ const translations = {
       "locationUsed": "Using your current location for more accurate results.",
       "loadedFromCache": "Result loaded from cache for a faster experience!",
       "audioGenerationFailed": "Could not generate audio. Please try again.",
+      "comingSoon": "Feature available soon.",
       "offline": {
         "queued": "Analysis queued for later submission.",
         "noInput": "No image or text to queue."
@@ -205,8 +207,8 @@ const translations = {
       "showOnMapAriaLabel": "Show location on map"
     },
     "audio": {
-      "playAriaLabel": "Listen to description",
-      "pauseAriaLabel": "Pause description",
+      "playAriaLabel_item": "Listen to description of {itemName}",
+      "pauseAriaLabel_item": "Pause description of {itemName}",
       "stopAriaLabel": "Stop listening"
     },
     "history": {
@@ -272,6 +274,7 @@ const translations = {
       "locationUsed": "Usando su ubicación actual para resultados más precisos.",
       "loadedFromCache": "¡Resultado cargado desde la caché para una experiencia más rápida!",
       "audioGenerationFailed": "No se pudo generar el audio. Por favor, inténtelo de nuevo.",
+      "comingSoon": "Función disponible próximamente.",
       "offline": {
         "queued": "Análisis en cola para envío posterior.",
         "noInput": "No hay imagen o texto para poner en cola."
@@ -323,8 +326,8 @@ const translations = {
       "showOnMapAriaLabel": "Mostrar ubicación en el mapa"
     },
     "audio": {
-      "playAriaLabel": "Escuchar descripción",
-      "pauseAriaLabel": "Pausar descripción",
+      "playAriaLabel_item": "Escuchar descripción de {itemName}",
+      "pauseAriaLabel_item": "Pausar descripción de {itemName}",
       "stopAriaLabel": "Dejar de escuchar"
     },
     "history": {
@@ -390,6 +393,7 @@ const translations = {
       "locationUsed": "使用您当前的位置以获得更准确的结果。",
       "loadedFromCache": "结果已从缓存加载，体验更快！",
       "audioGenerationFailed": "无法生成音频。请再试一次。",
+      "comingSoon": "功能即将推出。",
       "offline": {
         "queued": "分析已排队等待稍后提交。",
         "noInput": "没有要排队的图像或文本。"
@@ -441,8 +445,8 @@ const translations = {
       "showOnMapAriaLabel": "在地图上显示位置"
     },
     "audio": {
-      "playAriaLabel": "听描述",
-      "pauseAriaLabel": "暂停描述",
+      "playAriaLabel_item": "收听 {itemName} 的描述",
+      "pauseAriaLabel_item": "暂停 {itemName} 的描述",
       "stopAriaLabel": "停止收听"
     },
     "history": {
@@ -469,7 +473,7 @@ const translations = {
       "closeAriaLabel": "关闭地图"
     },
     "gemini": {
-      "imagePrompt": "分析这张图片。识别所有可见的可丢弃物品。对于每个物品，提供其名称、废物类型、是否可回收、处理建议、原因和环境影响事实。返回一个JSON对象，其中包含一个'items'键，该键包含一个对象数组，每个对象对应一个物品。如果未识别到任何物品，则返回一个空数组。用中文回答。",
+      "imagePrompt": "分析这张图片。识别所有可见的可丢棄物品。对于每个物品，提供其名称、废物类型、是否可回收、处理建议、原因和环境影响事实。返回一个JSON对象，其中包含一个'items'键，该键包含一个对象数组，每个对象对应一个物品。如果未识别到任何物品，则返回一个空数组。用中文回答。",
       "locationPrompt": "用户的位置是纬度 {lat}，经度 {lon}。如果可能，请提供与该地理区域相关的处理建议，特别是如果该地区有本地法规或特定的收集点。",
       "textPrompt": "您是可持续发展和回收方面的专家。回答以下用户关于废物处理的问题。问题：“{query}”。提供直接的答案、明确的处理建议和相关的环境影响事实。用中文回答。",
       "educationalPrompt": "将以下环境事实扩展成一个简短、信息丰富的段落，解释其背景或重要性。事实：'{fact}'。用中文回答。",
