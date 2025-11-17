@@ -27,19 +27,21 @@ export type AnalysisResult = MultiItemAnalysisResult | TextAnalysisResult;
 interface BaseHistoryItem {
   id: string;
   timestamp: string;
+  syncStatus: 'synced' | 'pending' | 'error';
 }
 
 // Item de histórico para uma análise de imagem
 export interface ImageHistoryItem extends BaseHistoryItem {
   queryType: 'image';
-  result: MultiItemAnalysisResult;
+  result?: MultiItemAnalysisResult;
   imagePreview: string; // Armazena a imagem como Data URL (base64)
+  mimeType: string; // Necessário para a sincronização offline
 }
 
 // Item de histórico para uma consulta de texto
 export interface TextHistoryItem extends BaseHistoryItem {
   queryType: 'text';
-  result: TextAnalysisResult;
+  result?: TextAnalysisResult;
   originalQuery: string; // Armazena a pergunta original do usuário
 }
 

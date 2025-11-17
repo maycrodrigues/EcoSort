@@ -20,7 +20,8 @@ const translations = {
       "ariaLive": {
         "loading": "Analisando...",
         "complete": "Análise concluída."
-      }
+      },
+      "offlineBanner": "Você está offline. Suas análises serão salvas e enviadas quando a conexão for restaurada."
     },
     "toast": {
       "fileTooLarge": "O arquivo de imagem é muito grande. Por favor, escolha um menor que 4MB.",
@@ -30,7 +31,20 @@ const translations = {
       "unknownError": "Ocorreu um erro desconhecido.",
       "tryAgainLater": "Por favor, tente novamente mais tarde.",
       "gpsFound": "Dados de GPS encontrados nos metadados da foto.",
-      "locationUsed": "Usando sua localização atual para resultados mais precisos."
+      "locationUsed": "Usando sua localização atual para resultados mais precisos.",
+      "loadedFromCache": "Resultado carregado do cache para uma experiência mais rápida!",
+      "offline": {
+        "queued": "Análise adicionada à fila para envio posterior.",
+        "noInput": "Nenhuma imagem ou texto para adicionar à fila."
+      },
+      "syncing": {
+        "started": "Conexão restaurada. Sincronizando itens pendentes...",
+        "completed": "Sincronização concluída com sucesso!"
+      },
+      "history": {
+        "pending": "Este item está na fila para ser analisado. Fique online para sincronizar.",
+        "error": "Ocorreu um erro ao sincronizar este item. Tente novamente mais tarde."
+      }
     },
     "imageUploader": {
       "title": "1. Envie uma foto do seu resíduo",
@@ -76,7 +90,12 @@ const translations = {
         "subtitle": "Suas futuras análises aparecerão aqui."
       },
       "clearButton": "Limpar Histórico",
-      "imageAnalysisNoItems": "Análise de imagem (sem itens)"
+      "imageAnalysisNoItems": "Análise de imagem (sem itens)",
+      "imageAnalysis": "Análise de Imagem",
+      "status": {
+        "pending": "Pendente",
+        "error": "Erro na sincronização"
+      }
     },
     "educationalModal": {
       "title": "Saiba Mais",
@@ -107,7 +126,8 @@ const translations = {
       "ariaLive": {
         "loading": "Analyzing...",
         "complete": "Analysis complete."
-      }
+      },
+      "offlineBanner": "You are offline. Your analyses will be saved and sent when connection is restored."
     },
     "toast": {
       "fileTooLarge": "The image file is too large. Please choose a file smaller than 4MB.",
@@ -117,7 +137,20 @@ const translations = {
       "unknownError": "An unknown error occurred.",
       "tryAgainLater": "Please try again later.",
       "gpsFound": "GPS data found in photo metadata.",
-      "locationUsed": "Using your current location for more accurate results."
+      "locationUsed": "Using your current location for more accurate results.",
+      "loadedFromCache": "Result loaded from cache for a faster experience!",
+      "offline": {
+        "queued": "Analysis queued for later submission.",
+        "noInput": "No image or text to queue."
+      },
+      "syncing": {
+        "started": "Connection restored. Syncing pending items...",
+        "completed": "Sync completed successfully!"
+      },
+      "history": {
+        "pending": "This item is queued for analysis. Go online to sync.",
+        "error": "An error occurred while syncing this item. Please try again later."
+      }
     },
     "imageUploader": {
       "title": "1. Upload a photo of your waste",
@@ -163,7 +196,12 @@ const translations = {
         "subtitle": "Your future analyses will appear here."
       },
       "clearButton": "Clear History",
-      "imageAnalysisNoItems": "Image analysis (no items)"
+      "imageAnalysisNoItems": "Image analysis (no items)",
+      "imageAnalysis": "Image Analysis",
+      "status": {
+        "pending": "Pending",
+        "error": "Sync error"
+      }
     },
     "educationalModal": {
       "title": "Learn More",
@@ -194,7 +232,8 @@ const translations = {
       "ariaLive": {
         "loading": "Analizando...",
         "complete": "Análisis completo."
-      }
+      },
+      "offlineBanner": "Estás desconectado. Tus análisis se guardarán y se enviarán cuando se restablezca la conexión."
     },
     "toast": {
       "fileTooLarge": "El archivo de imagen es demasiado grande. Por favor, elija un archivo de menos de 4MB.",
@@ -204,7 +243,20 @@ const translations = {
       "unknownError": "Ocurrió un error desconocido.",
       "tryAgainLater": "Por favor, inténtelo de nuevo más tarde.",
       "gpsFound": "Datos de GPS encontrados en los metadatos de la foto.",
-      "locationUsed": "Usando su ubicación actual para resultados más precisos."
+      "locationUsed": "Usando su ubicación actual para resultados más precisos.",
+      "loadedFromCache": "¡Resultado cargado desde la caché para una experiencia más rápida!",
+      "offline": {
+        "queued": "Análisis en cola para envío posterior.",
+        "noInput": "No hay imagen o texto para poner en cola."
+      },
+      "syncing": {
+        "started": "Conexión restaurada. Sincronizando elementos pendientes...",
+        "completed": "¡Sincronización completada con éxito!"
+      },
+      "history": {
+        "pending": "Este elemento está en cola para ser analizado. Conéctese para sincronizar.",
+        "error": "Ocurrió un error al sincronizar este elemento. Por favor, inténtelo de nuevo más tarde."
+      }
     },
     "imageUploader": {
       "title": "1. Sube una foto de tu residuo",
@@ -250,7 +302,12 @@ const translations = {
         "subtitle": "Tus futuros análisis aparecerán aquí."
       },
       "clearButton": "Limpiar Historial",
-      "imageAnalysisNoItems": "Análisis de imagen (sin artículos)"
+      "imageAnalysisNoItems": "Análisis de imagen (sin artículos)",
+      "imageAnalysis": "Análisis de Imagen",
+      "status": {
+        "pending": "Pendiente",
+        "error": "Error de sincronización"
+      }
     },
     "educationalModal": {
       "title": "Aprende Más",
@@ -281,7 +338,8 @@ const translations = {
       "ariaLive": {
         "loading": "分析中...",
         "complete": "分析完成。"
-      }
+      },
+      "offlineBanner": "您已离线。您的分析将被保存并在连接恢复后发送。"
     },
     "toast": {
       "fileTooLarge": "图像文件太大。请选择小于4MB的文件。",
@@ -291,7 +349,20 @@ const translations = {
       "unknownError": "发生未知错误。",
       "tryAgainLater": "请稍后再试。",
       "gpsFound": "在照片元数据中找到GPS数据。",
-      "locationUsed": "使用您当前的位置以获得更准确的结果。"
+      "locationUsed": "使用您当前的位置以获得更准确的结果。",
+      "loadedFromCache": "结果已从缓存加载，体验更快！",
+      "offline": {
+        "queued": "分析已排队等待稍后提交。",
+        "noInput": "没有要排队的图像或文本。"
+      },
+      "syncing": {
+        "started": "连接已恢复。正在同步待处理的项目...",
+        "completed": "同步成功完成！"
+      },
+      "history": {
+        "pending": "此项目正在排队等待分析。请上线以同步。",
+        "error": "同步此项目时出错。请稍后再试。"
+      }
     },
     "imageUploader": {
       "title": "1. 上传您的废物照片",
@@ -337,7 +408,12 @@ const translations = {
         "subtitle": "您未来的分析将出现在这里。"
       },
       "clearButton": "清除历史记录",
-      "imageAnalysisNoItems": "图像分析（无项目）"
+      "imageAnalysisNoItems": "图像分析（无项目）",
+      "imageAnalysis": "图像分析",
+      "status": {
+        "pending": "待定",
+        "error": "同步错误"
+      }
     },
     "educationalModal": {
       "title": "了解更多",

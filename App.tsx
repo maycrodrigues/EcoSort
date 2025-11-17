@@ -6,7 +6,7 @@ import { AnalysisDisplay } from './components/AnalysisDisplay';
 import { analyzeImage, analyzeTextQuery, getExpandedContent } from './services/geminiService';
 import { fileToBase64, createImagePreview } from './utils/fileUtils';
 import { getGPSData } from './utils/exifUtils';
-import type { AnalysisResult, HistoryItem, EducationalContent } from './types';
+import type { AnalysisResult, HistoryItem, EducationalContent, ImageHistoryItem, TextHistoryItem } from './types';
 import { SparklesIcon, PhotoIcon, ChatBubbleLeftRightIcon } from './components/Icons';
 import { Toast } from './components/Toast';
 import { TextQueryInput } from './components/TextQueryInput';
@@ -15,6 +15,8 @@ import { HistoryModal } from './components/HistoryModal';
 import { useDarkMode } from './hooks/useDarkMode';
 import { useI18n } from './contexts/i18nContext';
 import { EducationalModal } from './components/EducationalModal';
+import { useOnlineStatus } from './hooks/useOnlineStatus';
+import { ConnectionStatusBanner } from './components/ConnectionStatusBanner';
 
 interface ToastState {
   message: string;
@@ -47,9 +49,12 @@ const App: React.FC = () => {
   const [educationalContent, setEducationalContent] = useState<EducationalContent | null>(null);
   const [isEducationalContentLoading, setIsEducationalContentLoading] = useState(false);
   const [location, setLocation] = useState<LocationState | null>(null);
+  const [isSyncing, setIsSyncing] = useState(false);
 
+  const isOnline = useOnlineStatus();
   const historyButtonRef = useRef<HTMLButtonElement>(null);
   const prevIsHistoryOpen = useRef(isHistoryOpen);
+  const analysisCache = useRef<Map<string, AnalysisResult>>(new Map());
 
   useEffect(() => {
     // Retorna o foco ao botão de Histórico quando o modal é fechado.
@@ -62,6 +67,64 @@ const App: React.FC = () => {
   const showToast = (message: string, type: 'error' | 'info') => {
     setToast({ message, type });
   };
+  
+  // Efeito para sincronizar itens pendentes quando a conexão voltar
+  useEffect(() => {
+    const syncPendingItems = async () => {
+      const pendingItems = history.filter(item => item.syncStatus === 'pending');
+      if (isOnline && !isSyncing && pendingItems.length > 0) {
+        setIsSyncing(true);
+        showToast(t('toast.syncing.started'), 'info');
+
+        const updatedHistory = await Promise.all(history.map(async (item) => {
+          if (item.syncStatus !== 'pending') {
+            return item;
+          }
+
+          try {
+            // FIX: The `result` variable is now scoped within the type-guarded blocks
+            // to ensure TypeScript can correctly infer the types. This resolves the
+            // conflict where a general `AnalysisResult` was being assigned to
+            // specific `ImageHistoryItem` or `TextHistoryItem` types.
+            if (item.queryType === 'image') {
+              const base64 = item.imagePreview.split(',')[1];
+              const result = await analyzeImage(base64, item.mimeType, {
+                prompt: t('gemini.imagePrompt'),
+                locationPrompt: t('gemini.locationPrompt'),
+                error: t('gemini.imageError'),
+              }, null); // Não temos localização para itens offline
+              
+              if (result) {
+                return { ...item, result, syncStatus: 'synced' as const };
+              }
+              // Se a API retornar nulo, marca como erro
+              return { ...item, syncStatus: 'error' as const };
+            } else { // text
+              const result = await analyzeTextQuery(item.originalQuery, {
+                prompt: t('gemini.textPrompt'),
+                error: t('gemini.textError'),
+              });
+
+              if (result) {
+                return { ...item, result, syncStatus: 'synced' as const };
+              }
+              // Se a API retornar nulo, marca como erro
+              return { ...item, syncStatus: 'error' as const };
+            }
+          } catch (error) {
+            console.error('Sync failed for item:', item.id, error);
+            return { ...item, syncStatus: 'error' as const };
+          }
+        }));
+
+        setHistory(updatedHistory);
+        setIsSyncing(false);
+        showToast(t('toast.syncing.completed'), 'info');
+      }
+    };
+
+    syncPendingItems();
+  }, [isOnline, history, isSyncing, setHistory, t]);
 
   const handleFileChange = async (file: File | null) => {
     setLocation(null); // Reseta a localização a cada nova imagem
@@ -91,7 +154,7 @@ const App: React.FC = () => {
     }
   };
 
-  const resetState = () => {
+  const resetState = (clearMode: boolean = true) => {
     setSelectedFile(null);
     if (imagePreview) {
       URL.revokeObjectURL(imagePreview);
@@ -102,20 +165,71 @@ const App: React.FC = () => {
     setIsLoading(false);
     setTextQuery('');
     setLocation(null);
+    if(clearMode) {
+      setMode('image');
+    }
   }
 
   const handleClear = useCallback(() => {
-    resetState();
+    resetState(false);
   }, [imagePreview]);
 
   const handleModeChange = (newMode: AnalysisMode) => {
     if(mode !== newMode) {
-      resetState();
+      resetState(false);
       setMode(newMode);
     }
   }
 
   const handleAnalyzeClick = async () => {
+    // Lógica Offline-First
+    if (!isOnline) {
+      if (mode === 'image' && selectedFile && historyImagePreview) {
+        const newHistoryItem: ImageHistoryItem = {
+          id: Date.now().toString(),
+          timestamp: new Date().toISOString(),
+          queryType: 'image',
+          syncStatus: 'pending',
+          imagePreview: historyImagePreview,
+          mimeType: selectedFile.type,
+        };
+        setHistory([newHistoryItem, ...history]);
+        showToast(t('toast.offline.queued'), 'info');
+        handleClear();
+      } else if (mode === 'text' && textQuery.trim()) {
+        const newHistoryItem: TextHistoryItem = {
+          id: Date.now().toString(),
+          timestamp: new Date().toISOString(),
+          queryType: 'text',
+          syncStatus: 'pending',
+          originalQuery: textQuery,
+        };
+        setHistory([newHistoryItem, ...history]);
+        showToast(t('toast.offline.queued'), 'info');
+        handleClear();
+      } else {
+        showToast(t('toast.offline.noInput'), 'error');
+      }
+      return;
+    }
+
+    // Verifica o cache antes de fazer a chamada à API
+    if (mode === 'image' && historyImagePreview) {
+      if (analysisCache.current.has(historyImagePreview)) {
+        setAnalysisResult(analysisCache.current.get(historyImagePreview)!);
+        showToast(t('toast.loadedFromCache'), 'info');
+        return;
+      }
+    } else if (mode === 'text' && textQuery.trim()) {
+      const queryKey = textQuery.trim();
+      if (analysisCache.current.has(queryKey)) {
+        setAnalysisResult(analysisCache.current.get(queryKey)!);
+        showToast(t('toast.loadedFromCache'), 'info');
+        return;
+      }
+    }
+
+    // Lógica Online
     setIsLoading(true);
     setAnalysisResult(null);
     setAnalysisStatus(t('app.ariaLive.loading'));
@@ -150,12 +264,15 @@ const App: React.FC = () => {
 
         if (result) {
           setAnalysisResult(result);
-          const newHistoryItem: HistoryItem = {
+          analysisCache.current.set(historyImagePreview, result); // Salva no cache
+          const newHistoryItem: ImageHistoryItem = {
             id: Date.now().toString(),
             timestamp: new Date().toISOString(),
             queryType: 'image',
+            syncStatus: 'synced',
             result,
             imagePreview: historyImagePreview,
+            mimeType: selectedFile.type,
           };
           setHistory([newHistoryItem, ...history]);
         }
@@ -173,10 +290,12 @@ const App: React.FC = () => {
         
         if (result) {
           setAnalysisResult(result);
-          const newHistoryItem: HistoryItem = {
+          analysisCache.current.set(textQuery.trim(), result); // Salva no cache
+          const newHistoryItem: TextHistoryItem = {
             id: Date.now().toString(),
             timestamp: new Date().toISOString(),
             queryType: 'text',
+            syncStatus: 'synced',
             result,
             originalQuery: textQuery,
           };
@@ -213,26 +332,30 @@ const App: React.FC = () => {
   };
   
   const isAnalyzeButtonDisabled = () => {
-    if (isLoading) return true;
+    if (isLoading || isSyncing) return true;
     if (mode === 'image') return !selectedFile;
     if (mode === 'text') return !textQuery.trim();
     return true;
   }
   
   const handleSelectHistoryItem = (item: HistoryItem) => {
-    setIsLoading(false); // Garante que não está em modo de carregamento
+    if (item.syncStatus === 'pending') {
+      showToast(t('toast.history.pending'), 'info');
+    } else if (item.syncStatus === 'error') {
+      showToast(t('toast.history.error'), 'error');
+    }
 
     if (item.queryType === 'image') {
       setMode('image');
-      setImagePreview(item.imagePreview); // Restaura o preview da imagem
+      setImagePreview(item.imagePreview);
       setHistoryImagePreview(item.imagePreview);
-      setAnalysisResult(item.result);
+      setAnalysisResult(item.result || null); // Mostra o resultado se estiver sincronizado
       setTextQuery('');
-      setSelectedFile(null); // Não podemos restaurar o objeto File
+      setSelectedFile(null);
     } else { // 'text'
       setMode('text');
-      setTextQuery(item.originalQuery); // Restaura a pergunta original
-      setAnalysisResult(item.result);
+      setTextQuery(item.originalQuery);
+      setAnalysisResult(item.result || null); // Mostra o resultado se estiver sincronizado
       setImagePreview(null);
       setHistoryImagePreview(null);
       setSelectedFile(null);
@@ -250,6 +373,7 @@ const App: React.FC = () => {
 
   return (
     <div className="flex flex-col min-h-screen bg-gray-50 dark:bg-gray-900 text-brand-dark dark:text-gray-200 font-sans transition-colors duration-300">
+      <ConnectionStatusBanner />
       <div aria-live="polite" className="sr-only">
         {analysisStatus}
       </div>

@@ -8,14 +8,44 @@ declare global {
 }
 
 /**
+ * Aguarda a biblioteca ExifReader ficar disponível no objeto window.
+ * Isso é necessário porque ela é carregada a partir de uma tag de script externa.
+ * @param timeout O tempo máximo de espera em milissegundos.
+ * @returns Uma promessa que resolve quando a biblioteca está pronta, ou rejeita no timeout.
+ */
+const waitForExifReader = (timeout = 3000): Promise<void> => {
+  return new Promise((resolve, reject) => {
+    // Verifica se já está disponível
+    if (typeof window.ExifReader !== 'undefined') {
+      return resolve();
+    }
+
+    const startTime = Date.now();
+    const intervalId = setInterval(() => {
+      if (typeof window.ExifReader !== 'undefined') {
+        clearInterval(intervalId);
+        resolve();
+      } else if (Date.now() - startTime > timeout) {
+        clearInterval(intervalId);
+        reject(new Error("A biblioteca ExifReader não carregou dentro do tempo limite."));
+      }
+    }, 100); // Verifica a cada 100ms
+  });
+};
+
+
+/**
  * Extrai dados de GPS (latitude e longitude) dos metadados EXIF de um arquivo de imagem.
  * @param file O arquivo de imagem (File object).
  * @returns Uma promessa que resolve para um objeto com lat e lon, ou null se não houver dados de GPS.
  */
 export const getGPSData = async (file: File): Promise<{ lat: number; lon: number } | null> => {
-  // Verificação de segurança para garantir que a biblioteca foi carregada.
-  if (typeof window.ExifReader === 'undefined') {
-    console.error("ExifReader library is not available on the window object. Please ensure it's loaded correctly.");
+  try {
+    // Aguarda a biblioteca carregar, com um tempo limite.
+    await waitForExifReader();
+  } catch (error) {
+    // Isso captura o erro de timeout do waitForExifReader.
+    console.error("A biblioteca ExifReader não está disponível no objeto window. Verifique se ela foi carregada corretamente.", error);
     return null;
   }
   
@@ -37,7 +67,7 @@ export const getGPSData = async (file: File): Promise<{ lat: number; lon: number
   } catch (error) {
     // A biblioteca pode lançar erros para arquivos sem metadados ou corrompidos.
     // Tratamos isso graciosamente em vez de quebrar a aplicação.
-    console.warn("Could not read EXIF data from the image. It might be missing or corrupted.", error);
+    console.warn("Não foi possível ler os dados EXIF da imagem. O arquivo pode estar sem metadados ou corrompido.", error);
     return null;
   }
 };
