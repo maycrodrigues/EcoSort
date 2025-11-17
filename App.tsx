@@ -5,6 +5,7 @@ import { ImageUploader } from './components/ImageUploader';
 import { AnalysisDisplay } from './components/AnalysisDisplay';
 import { analyzeImage, analyzeTextQuery, getExpandedContent } from './services/geminiService';
 import { fileToBase64 } from './utils/fileUtils';
+import { getGPSData } from './utils/exifUtils';
 import type { AnalysisResult, HistoryItem, EducationalContent } from './types';
 import { SparklesIcon, PhotoIcon, ChatBubbleLeftRightIcon } from './components/Icons';
 import { Toast } from './components/Toast';
@@ -18,6 +19,11 @@ import { EducationalModal } from './components/EducationalModal';
 interface ToastState {
   message: string;
   type: 'error' | 'info';
+}
+
+interface LocationState {
+  lat: number;
+  lon: number;
 }
 
 type AnalysisMode = 'image' | 'text';
@@ -39,6 +45,7 @@ const App: React.FC = () => {
   const [isEducationalModalOpen, setIsEducationalModalOpen] = useState(false);
   const [educationalContent, setEducationalContent] = useState<EducationalContent | null>(null);
   const [isEducationalContentLoading, setIsEducationalContentLoading] = useState(false);
+  const [location, setLocation] = useState<LocationState | null>(null);
 
   const historyButtonRef = useRef<HTMLButtonElement>(null);
   const prevIsHistoryOpen = useRef(isHistoryOpen);
@@ -55,7 +62,8 @@ const App: React.FC = () => {
     setToast({ message, type });
   };
 
-  const handleFileChange = (file: File | null) => {
+  const handleFileChange = async (file: File | null) => {
+    setLocation(null); // Reseta a localização a cada nova imagem
     if (file) {
       if (file.size > 4 * 1024 * 1024) { // Limite de 4MB
         showToast(t('toast.fileTooLarge'), "error");
@@ -64,6 +72,16 @@ const App: React.FC = () => {
       setSelectedFile(file);
       setImagePreview(URL.createObjectURL(file));
       setAnalysisResult(null);
+
+      try {
+        const gpsData = await getGPSData(file);
+        if (gpsData) {
+          setLocation(gpsData);
+          showToast(t('toast.gpsFound'), 'info');
+        }
+      } catch (err) {
+        console.warn("Não foi possível ler os dados EXIF da imagem.", err);
+      }
     }
   };
 
@@ -76,6 +94,7 @@ const App: React.FC = () => {
     setAnalysisResult(null);
     setIsLoading(false);
     setTextQuery('');
+    setLocation(null);
   }
 
   const handleClear = useCallback(() => {
@@ -102,11 +121,31 @@ const App: React.FC = () => {
           setIsLoading(false);
           return;
         }
+
+        let locationForAnalysis = location;
+        // Se a imagem não tiver GPS, tenta obter a localização do navegador
+        if (!locationForAnalysis) {
+          try {
+            const position = await new Promise<GeolocationPosition>((resolve, reject) => {
+              navigator.geolocation.getCurrentPosition(resolve, reject, { timeout: 5000 });
+            });
+            locationForAnalysis = {
+              lat: position.coords.latitude,
+              lon: position.coords.longitude
+            };
+            showToast(t('toast.locationUsed'), 'info');
+          } catch (geoError) {
+            console.warn("Geolocalização do navegador negada ou indisponível.", geoError);
+          }
+        }
+
         const { base64, mimeType } = await fileToBase64(selectedFile);
         result = await analyzeImage(base64, mimeType, {
           prompt: t('gemini.imagePrompt'),
+          locationPrompt: t('gemini.locationPrompt'),
           error: t('gemini.imageError'),
-        });
+        }, locationForAnalysis);
+
       } else { // mode === 'text'
         if (!textQuery.trim()) {
           showToast(t('toast.enterQuestion'), "error");

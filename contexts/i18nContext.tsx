@@ -28,7 +28,9 @@ const translations = {
       "enterQuestion": "Por favor, digite sua pergunta.",
       "analysisFailed": "Falha na análise",
       "unknownError": "Ocorreu um erro desconhecido.",
-      "tryAgainLater": "Por favor, tente novamente mais tarde."
+      "tryAgainLater": "Por favor, tente novamente mais tarde.",
+      "gpsFound": "Dados de GPS encontrados nos metadados da foto.",
+      "locationUsed": "Usando sua localização atual para resultados mais precisos."
     },
     "imageUploader": {
       "title": "1. Envie uma foto do seu resíduo",
@@ -82,6 +84,7 @@ const translations = {
     },
     "gemini": {
       "imagePrompt": "Analise esta imagem. Identifique TODOS os itens descartáveis visíveis. Para cada item, forneça seu nome, tipo de lixo, se é reciclável, uma sugestão de descarte, uma justificativa e um fato de impacto ambiental. Retorne um objeto JSON com uma chave 'items' contendo um array de objetos, um para cada item. Se nenhum item for identificado, retorne um array vazio. Responda em português do Brasil.",
+      "locationPrompt": "A localização do usuário é latitude {lat}, longitude {lon}. Forneça sugestões de descarte que sejam relevantes para esta área geográfica, se possível, especialmente se regulamentações locais ou pontos de coleta específicos forem conhecidos para essa região.",
       "textPrompt": "Você é um especialista em sustentabilidade e reciclagem. Responda à seguinte pergunta de um usuário sobre descarte de resíduos. Pergunta: \"{query}\". Forneça uma resposta direta, uma sugestão clara de descarte, e um fato de impacto ambiental relacionado. Responda em português do Brasil.",
       "educationalPrompt": "Expanda o seguinte fato ambiental em um parágrafo curto e informativo, explicando o contexto ou a importância. Fato: '{fact}'. Responda em português do Brasil.",
       "imageError": "Falha ao comunicar com o serviço de análise de imagem.",
@@ -112,7 +115,9 @@ const translations = {
       "enterQuestion": "Please enter your question.",
       "analysisFailed": "Analysis failed",
       "unknownError": "An unknown error occurred.",
-      "tryAgainLater": "Please try again later."
+      "tryAgainLater": "Please try again later.",
+      "gpsFound": "GPS data found in photo metadata.",
+      "locationUsed": "Using your current location for more accurate results."
     },
     "imageUploader": {
       "title": "1. Upload a photo of your waste",
@@ -166,6 +171,7 @@ const translations = {
     },
     "gemini": {
       "imagePrompt": "Analyze this image. Identify ALL visible disposable items. For each item, provide its name, waste type, if it's recyclable, a disposal suggestion, a reasoning, and an environmental impact fact. Return a JSON object with a key 'items' containing an array of objects, one for each item. If no items are identified, return an empty array. Respond in English.",
+      "locationPrompt": "The user's location is latitude {lat}, longitude {lon}. Provide disposal suggestions that are relevant to this geographic area if possible, especially if local regulations or specific collection points are known for that region.",
       "textPrompt": "You are an expert in sustainability and recycling. Answer the following user question about waste disposal. Question: \"{query}\". Provide a direct answer, a clear disposal suggestion, and a related environmental impact fact. Respond in English.",
       "educationalPrompt": "Expand the following environmental fact into a short, informative paragraph, explaining the context or importance. Fact: '{fact}'. Respond in English.",
       "imageError": "Failed to communicate with the image analysis service.",
@@ -196,7 +202,9 @@ const translations = {
       "enterQuestion": "Por favor, ingrese su pregunta.",
       "analysisFailed": "Falló el análisis",
       "unknownError": "Ocurrió un error desconocido.",
-      "tryAgainLater": "Por favor, inténtelo de nuevo más tarde."
+      "tryAgainLater": "Por favor, inténtelo de nuevo más tarde.",
+      "gpsFound": "Datos de GPS encontrados en los metadatos de la foto.",
+      "locationUsed": "Usando su ubicación actual para resultados más precisos."
     },
     "imageUploader": {
       "title": "1. Sube una foto de tu residuo",
@@ -250,6 +258,7 @@ const translations = {
     },
     "gemini": {
       "imagePrompt": "Analiza esta imagen. Identifica TODOS los artículos desechables visibles. Para cada artículo, proporciona su nombre, tipo de residuo, si es reciclable, una sugerencia de eliminación, un razonamiento y un dato de impacto ambiental. Devuelve un objeto JSON con una clave 'items' que contenga un array de objetos, uno para cada artículo. Si no se identifican artículos, devuelve un array vacío. Responde en español.",
+      "locationPrompt": "La ubicación del usuario es latitud {lat}, longitud {lon}. Proporcione sugerencias de eliminación que sean relevantes para esta área geográfica si es posible, especialmente si se conocen regulaciones locales o puntos de recolección específicos para esa región.",
       "textPrompt": "Eres un experto en sostenibilidad y reciclaje. Responde la siguiente pregunta del usuario sobre la eliminación de residuos. Pregunta: \"{query}\". Proporciona una respuesta directa, una sugerencia clara de eliminación y un dato de impacto ambiental relacionado. Responde en español.",
       "educationalPrompt": "Amplía el siguiente dato ambiental en un párrafo corto e informativo, explicando el contexto o la importancia. Dato: '{fact}'. Responde en español.",
       "imageError": "Error al comunicarse con el servicio de análisis de imágenes.",
@@ -280,7 +289,9 @@ const translations = {
       "enterQuestion": "请输入您的问题。",
       "analysisFailed": "分析失败",
       "unknownError": "发生未知错误。",
-      "tryAgainLater": "请稍后再试。"
+      "tryAgainLater": "请稍后再试。",
+      "gpsFound": "在照片元数据中找到GPS数据。",
+      "locationUsed": "使用您当前的位置以获得更准确的结果。"
     },
     "imageUploader": {
       "title": "1. 上传您的废物照片",
@@ -334,6 +345,7 @@ const translations = {
     },
     "gemini": {
       "imagePrompt": "分析这张图片。识别所有可见的可丢弃物品。对于每个物品，提供其名称、废物类型、是否可回收、处理建议、原因和环境影响事实。返回一个JSON对象，其中包含一个'items'键，该键包含一个对象数组，每个对象对应一个物品。如果未识别到任何物品，则返回一个空数组。用中文回答。",
+      "locationPrompt": "用户的位置是纬度 {lat}，经度 {lon}。如果可能，请提供与该地理区域相关的处理建议，特别是如果该地区有本地法规或特定的收集点。",
       "textPrompt": "您是可持续发展和回收方面的专家。回答以下用户关于废物处理的问题。问题：“{query}”。提供直接的答案、明确的处理建议和相关的环境影响事实。用中文回答。",
       "educationalPrompt": "将以下环境事实扩展成一个简短、信息丰富的段落，解释其背景或重要性。事实：'{fact}'。用中文回答。",
       "imageError": "与图像分析服务通信失败。",

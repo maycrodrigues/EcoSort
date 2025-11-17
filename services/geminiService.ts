@@ -78,14 +78,26 @@ const textResponseSchema = {
 interface I18nStrings {
     prompt: string;
     error: string;
+    locationPrompt?: string; // Tornando opcional para não quebrar outras chamadas
 }
 
-export const analyzeImage = async (base64Image: string, mimeType: string, i18n: I18nStrings): Promise<MultiItemAnalysisResult> => {
+interface Location {
+    lat: number;
+    lon: number;
+}
+
+export const analyzeImage = async (base64Image: string, mimeType: string, i18n: I18nStrings, location: Location | null): Promise<MultiItemAnalysisResult> => {
     const imagePart = {
         inlineData: { data: base64Image, mimeType: mimeType },
     };
+
+    let promptText = i18n.prompt;
+    if (location && i18n.locationPrompt) {
+        promptText += ` ${i18n.locationPrompt.replace('{lat}', location.lat.toFixed(5)).replace('{lon}', location.lon.toFixed(5))}`;
+    }
+
     const textPart = {
-        text: i18n.prompt,
+        text: promptText,
     };
 
     try {
