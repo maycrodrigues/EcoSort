@@ -35,6 +35,7 @@ const translations = {
       "gpsFound": "Dados de GPS encontrados nos metadados da foto.",
       "locationUsed": "Usando sua localização atual para resultados mais precisos.",
       "loadedFromCache": "Resultado carregado do cache para uma experiência mais rápida!",
+      "audioGenerationFailed": "Não foi possível gerar o áudio. Tente novamente.",
       "offline": {
         "queued": "Análise adicionada à fila para envio posterior.",
         "noInput": "Nenhuma imagem ou texto para adicionar à fila."
@@ -84,6 +85,11 @@ const translations = {
       "aiAnswer": "Resposta",
       "learnMore": "Clique para saber mais",
       "showOnMapAriaLabel": "Mostrar localização no mapa"
+    },
+    "audio": {
+      "playAriaLabel": "Ouvir descrição",
+      "pauseAriaLabel": "Pausar descrição",
+      "stopAriaLabel": "Parar de ouvir"
     },
     "history": {
       "title": "Histórico de Análises",
@@ -147,6 +153,7 @@ const translations = {
       "gpsFound": "GPS data found in photo metadata.",
       "locationUsed": "Using your current location for more accurate results.",
       "loadedFromCache": "Result loaded from cache for a faster experience!",
+      "audioGenerationFailed": "Could not generate audio. Please try again.",
       "offline": {
         "queued": "Analysis queued for later submission.",
         "noInput": "No image or text to queue."
@@ -196,6 +203,11 @@ const translations = {
       "aiAnswer": "Answer",
       "learnMore": "Click to learn more",
       "showOnMapAriaLabel": "Show location on map"
+    },
+    "audio": {
+      "playAriaLabel": "Listen to description",
+      "pauseAriaLabel": "Pause description",
+      "stopAriaLabel": "Stop listening"
     },
     "history": {
       "title": "Analysis History",
@@ -259,6 +271,7 @@ const translations = {
       "gpsFound": "Datos de GPS encontrados en los metadatos de la foto.",
       "locationUsed": "Usando su ubicación actual para resultados más precisos.",
       "loadedFromCache": "¡Resultado cargado desde la caché para una experiencia más rápida!",
+      "audioGenerationFailed": "No se pudo generar el audio. Por favor, inténtelo de nuevo.",
       "offline": {
         "queued": "Análisis en cola para envío posterior.",
         "noInput": "No hay imagen o texto para poner en cola."
@@ -308,6 +321,11 @@ const translations = {
       "aiAnswer": "Respuesta",
       "learnMore": "Haz clic para saber más",
       "showOnMapAriaLabel": "Mostrar ubicación en el mapa"
+    },
+    "audio": {
+      "playAriaLabel": "Escuchar descripción",
+      "pauseAriaLabel": "Pausar descripción",
+      "stopAriaLabel": "Dejar de escuchar"
     },
     "history": {
       "title": "Historial de Análisis",
@@ -371,6 +389,7 @@ const translations = {
       "gpsFound": "在照片元数据中找到GPS数据。",
       "locationUsed": "使用您当前的位置以获得更准确的结果。",
       "loadedFromCache": "结果已从缓存加载，体验更快！",
+      "audioGenerationFailed": "无法生成音频。请再试一次。",
       "offline": {
         "queued": "分析已排队等待稍后提交。",
         "noInput": "没有要排队的图像或文本。"
@@ -420,6 +439,11 @@ const translations = {
       "aiAnswer": "回答",
       "learnMore": "点击了解更多",
       "showOnMapAriaLabel": "在地图上显示位置"
+    },
+    "audio": {
+      "playAriaLabel": "听描述",
+      "pauseAriaLabel": "暂停描述",
+      "stopAriaLabel": "停止收听"
     },
     "history": {
       "title": "分析历史",

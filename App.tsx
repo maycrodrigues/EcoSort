@@ -4,7 +4,7 @@ import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { Header } from './components/Header';
 import { ImageUploader } from './components/ImageUploader';
 import { AnalysisDisplay } from './components/AnalysisDisplay';
-import { analyzeImage, analyzeTextQuery, getExpandedContent } from './services/geminiService';
+import { analyzeImage, analyzeTextQuery, getExpandedContent, generateSpeech } from './services/geminiService';
 import { fileToBase64, createImagePreview } from './utils/fileUtils';
 import { getGPSData } from './utils/exifUtils';
 import type { AnalysisResult, HistoryItem, EducationalContent, ImageHistoryItem, TextHistoryItem, LocationState, MultiItemAnalysisResult } from './types';
@@ -19,6 +19,7 @@ import { EducationalModal } from './components/EducationalModal';
 import { useOnlineStatus } from './hooks/useOnlineStatus';
 import { ConnectionStatusBanner } from './components/ConnectionStatusBanner';
 import { MapModal } from './components/MapModal';
+import { decode, decodeAudioData } from './utils/audioUtils';
 
 interface ToastState {
   message: string;
@@ -26,6 +27,11 @@ interface ToastState {
 }
 
 type AnalysisMode = 'image' | 'text';
+
+interface AudioState {
+  itemId: string | null;
+  status: 'idle' | 'loading' | 'playing' | 'paused' | 'error';
+}
 
 const App: React.FC = () => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -51,11 +57,17 @@ const App: React.FC = () => {
   const [mapLocation, setMapLocation] = useState<LocationState | null>(null);
   const [isFromHistory, setIsFromHistory] = useState(false);
   const [historyMimeType, setHistoryMimeType] = useState<string | null>(null);
+  const [audioState, setAudioState] = useState<AudioState>({ itemId: null, status: 'idle' });
 
   const isOnline = useOnlineStatus();
   const historyButtonRef = useRef<HTMLButtonElement>(null);
   const prevIsHistoryOpen = useRef(isHistoryOpen);
   const analysisCache = useRef<Map<string, AnalysisResult>>(new Map());
+  const audioContextRef = useRef<AudioContext | null>(null);
+  const audioSourceRef = useRef<AudioBufferSourceNode | null>(null);
+  const audioBufferCacheRef = useRef<Map<string, AudioBuffer>>(new Map());
+  const audioProgressRef = useRef({ startOffset: 0, startTime: 0 });
+
 
   useEffect(() => {
     // Retorna o foco ao botão de Histórico quando o modal é fechado.
@@ -138,6 +150,7 @@ const App: React.FC = () => {
       setHistoryImagePreview(dataUrl);
       setAnalysisResult(null);
       setIsFromHistory(false);
+      handleStopAudio();
 
       try {
         const gpsData = await getGPSData(file);
@@ -164,6 +177,7 @@ const App: React.FC = () => {
     setLocation(null);
     setIsFromHistory(false);
     setHistoryMimeType(null);
+    handleStopAudio();
     if(clearMode) {
       setMode('image');
     }
@@ -181,6 +195,7 @@ const App: React.FC = () => {
   }
 
   const handleAnalyzeClick = async () => {
+    handleStopAudio();
     const isReanalyzing = isFromHistory;
     setIsFromHistory(false); // Reseta imediatamente para que o botão volte ao normal após a análise.
 
@@ -366,6 +381,7 @@ const App: React.FC = () => {
   }
   
   const handleSelectHistoryItem = (item: HistoryItem) => {
+    handleStopAudio();
     setIsFromHistory(item.syncStatus === 'synced');
 
     if (item.syncStatus === 'pending') {
@@ -405,6 +421,111 @@ const App: React.FC = () => {
     setIsMapModalOpen(true);
   };
   
+  const handleStopAudio = useCallback(() => {
+    if (audioSourceRef.current) {
+      audioSourceRef.current.onended = null;
+      try {
+        audioSourceRef.current.stop();
+      } catch (e) {
+        // Ignora erros se stop() for chamado em uma fonte já parada
+      }
+      audioSourceRef.current.disconnect();
+      audioSourceRef.current = null;
+    }
+    setAudioState({ itemId: null, status: 'idle' });
+    audioProgressRef.current = { startOffset: 0, startTime: 0 };
+  }, []);
+
+  const playAudioFromBuffer = (itemId: string, buffer: AudioBuffer) => {
+    const ctx = audioContextRef.current!;
+    if (ctx.state === 'suspended') {
+      ctx.resume();
+    }
+  
+    if (audioSourceRef.current) {
+      audioSourceRef.current.stop();
+      audioSourceRef.current.disconnect();
+    }
+  
+    const source = ctx.createBufferSource();
+    source.buffer = buffer;
+    source.connect(ctx.destination);
+  
+    const offset = audioProgressRef.current.startOffset % buffer.duration;
+    source.start(0, offset);
+  
+    audioSourceRef.current = source;
+    // startTime agora rastreia o início da *seção* atual de reprodução
+    audioProgressRef.current.startTime = ctx.currentTime;
+    setAudioState({ itemId, status: 'playing' });
+  
+    source.onended = () => {
+      setAudioState(current => {
+        // O onended é acionado no final natural e no .stop() manual.
+        // Só queremos redefinir o estado se o áudio terminou de tocar (não foi pausado).
+        if (current.itemId === itemId && current.status === 'playing') {
+          handleStopAudio();
+          return { itemId: null, status: 'idle' };
+        }
+        return current;
+      });
+    };
+  };
+
+  const handleToggleAudio = useCallback(async (itemId: string, textToSpeak: string) => {
+    if (!audioContextRef.current) {
+      // @ts-ignore
+      audioContextRef.current = new (window.AudioContext || window.webkitAudioContext)({ sampleRate: 24000 });
+    }
+    const ctx = audioContextRef.current;
+    const isSameItem = audioState.itemId === itemId;
+  
+    if (isSameItem && audioState.status === 'playing') {
+      // --- PAUSE ---
+      if (audioSourceRef.current) {
+        const elapsedTime = ctx.currentTime - audioProgressRef.current.startTime;
+        audioProgressRef.current.startOffset += elapsedTime;
+  
+        audioSourceRef.current.onended = null;
+        audioSourceRef.current.stop();
+        audioSourceRef.current.disconnect();
+        audioSourceRef.current = null;
+      }
+      setAudioState({ itemId, status: 'paused' });
+      return;
+    }
+  
+    if (isSameItem && audioState.status === 'paused') {
+      // --- RESUME ---
+      const buffer = audioBufferCacheRef.current.get(itemId);
+      if (buffer) {
+        playAudioFromBuffer(itemId, buffer);
+      }
+      return;
+    }
+  
+    // --- PLAY NEW or from IDLE/ERROR ---
+    handleStopAudio();
+  
+    const cachedBuffer = audioBufferCacheRef.current.get(itemId);
+    if (cachedBuffer) {
+      playAudioFromBuffer(itemId, cachedBuffer);
+    } else {
+      setAudioState({ itemId, status: 'loading' });
+      try {
+        const audioBase64 = await generateSpeech(textToSpeak, { error: t('toast.audioGenerationFailed') });
+        const buffer = await decodeAudioData(decode(audioBase64), ctx, 24000, 1);
+        audioBufferCacheRef.current.set(itemId, buffer);
+        playAudioFromBuffer(itemId, buffer);
+      } catch (err) {
+        const errorMessage = err instanceof Error ? err.message : t('toast.unknownError');
+        showToast(errorMessage, 'error');
+        setAudioState({ itemId: null, status: 'error' });
+        handleStopAudio();
+      }
+    }
+  }, [audioState, t, handleStopAudio]);
+  
   const shouldShowAnalysisPanel = isLoading || analysisResult !== null;
 
   return (
@@ -422,20 +543,20 @@ const App: React.FC = () => {
       />
       <HistoryModal
         isOpen={isHistoryOpen}
-        onClose={() => setIsHistoryOpen(false)}
+        onClose={() => { setIsHistoryOpen(false); handleStopAudio(); }}
         history={history}
         onSelectItem={handleSelectHistoryItem}
         onClearHistory={handleClearHistory}
       />
       <EducationalModal
         isOpen={isEducationalModalOpen}
-        onClose={() => setIsEducationalModalOpen(false)}
+        onClose={() => { setIsEducationalModalOpen(false); handleStopAudio(); }}
         content={educationalContent}
         isLoading={isEducationalContentLoading}
       />
       <MapModal
         isOpen={isMapModalOpen}
-        onClose={() => setIsMapModalOpen(false)}
+        onClose={() => { setIsMapModalOpen(false); handleStopAudio(); }}
         location={mapLocation}
       />
       <main className="flex-grow container mx-auto p-4 md:p-8 w-full">
@@ -495,6 +616,8 @@ const App: React.FC = () => {
                   isLoading={isLoading}
                   onLearnMore={handleLearnMore}
                   onShowOnMap={handleShowOnMap}
+                  audioState={audioState}
+                  onToggleAudio={handleToggleAudio}
                 />
             </div>
           )}

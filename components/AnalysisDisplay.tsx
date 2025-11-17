@@ -2,7 +2,7 @@
 
 import React from 'react';
 import type { AnalysisResult, MultiItemAnalysisResult, SingleItemAnalysisResult, TextAnalysisResult, LocationState } from '../types';
-import { CheckCircleIcon, XCircleIcon, InformationCircleIcon, GlobeAltIcon, TrashIcon, ChatBubbleLeftRightIcon, CubeTransparentIcon, BookOpenIcon, MapPinIcon } from './Icons';
+import { CheckCircleIcon, XCircleIcon, InformationCircleIcon, GlobeAltIcon, TrashIcon, ChatBubbleLeftRightIcon, CubeTransparentIcon, BookOpenIcon, MapPinIcon, SpeakerWaveIcon, PauseCircleIcon } from './Icons';
 import { useI18n } from '../contexts/i18nContext';
 
 interface AnalysisDisplayProps {
@@ -10,10 +10,25 @@ interface AnalysisDisplayProps {
   isLoading: boolean;
   onLearnMore: (fact: string) => void;
   onShowOnMap: (location: LocationState) => void;
+  audioState: {
+    itemId: string | null;
+    status: 'idle' | 'loading' | 'playing' | 'paused' | 'error';
+  };
+  onToggleAudio: (itemId: string, textToSpeak: string) => void;
 }
 
-const Spinner: React.FC = () => {
+const Spinner: React.FC<{ small?: boolean }> = ({ small = false }) => {
     const { t } = useI18n();
+    
+    if (small) {
+        return (
+            <svg className="animate-spin h-6 w-6 text-brand-green" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+        )
+    }
+
     return (
         <div className="flex flex-col items-center justify-center text-center text-brand-secondary dark:text-gray-400 h-full">
             <svg className="animate-spin h-12 w-12 text-brand-green" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -84,11 +99,61 @@ const InfoBlock: React.FC<{
     );
 };
 
-const ItemResultCard: React.FC<{ item: SingleItemAnalysisResult; onLearnMore: (fact: string) => void; }> = ({ item, onLearnMore }) => {
+const ItemResultCard: React.FC<{ 
+    item: SingleItemAnalysisResult; 
+    itemId: string;
+    onLearnMore: (fact: string) => void; 
+    audioState: AnalysisDisplayProps['audioState'];
+    onToggleAudio: AnalysisDisplayProps['onToggleAudio'];
+}> = ({ item, itemId, onLearnMore, audioState, onToggleAudio }) => {
     const { t } = useI18n();
+    
+    const textToSpeak = [
+        item.itemName,
+        `${t('analysis.disposalSuggestion')}: ${item.disposalSuggestion}`,
+        `${t('analysis.aiReasoning')}: ${item.reasoning}`,
+        item.environmentalImpact ? `${t('analysis.didYouKnow')}: ${item.environmentalImpact}` : ''
+    ].filter(Boolean).join('. ');
+
+    const handleToggleClick = () => {
+        onToggleAudio(itemId, textToSpeak);
+    }
+    
+    const renderAudioButton = () => {
+        const isCurrentItem = audioState.itemId === itemId;
+
+        if (isCurrentItem && audioState.status === 'loading') {
+            return <Spinner small />;
+        }
+        
+        let Icon;
+        let ariaLabel;
+
+        if (isCurrentItem && audioState.status === 'playing') {
+            Icon = PauseCircleIcon;
+            ariaLabel = t('audio.pauseAriaLabel');
+        } else {
+            Icon = SpeakerWaveIcon;
+            ariaLabel = t('audio.playAriaLabel');
+        }
+        
+        return (
+            <button 
+                onClick={handleToggleClick}
+                className="p-1.5 rounded-full text-brand-secondary dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600 transition-all hover:scale-110"
+                aria-label={ariaLabel}
+            >
+                <Icon className="w-6 h-6" />
+            </button>
+        )
+    }
+
     return (
         <div className="bg-white dark:bg-gray-700/50 p-4 rounded-lg border dark:border-gray-600 flex flex-col gap-3">
-            <h3 className="text-lg font-bold text-brand-dark dark:text-white">{item.itemName}</h3>
+            <div className="flex justify-between items-start">
+                <h3 className="text-lg font-bold text-brand-dark dark:text-white mr-2">{item.itemName}</h3>
+                {renderAudioButton()}
+            </div>
             <RecyclableBadge recyclable={item.recyclable} wasteType={item.wasteType} />
              <InfoBlock 
                 icon={<TrashIcon className="w-6 h-6 text-blue-600 dark:text-blue-400"/>} 
@@ -119,7 +184,13 @@ const ItemResultCard: React.FC<{ item: SingleItemAnalysisResult; onLearnMore: (f
 };
 
 
-const ImageResultDisplay: React.FC<{ result: MultiItemAnalysisResult; onLearnMore: (fact: string) => void; onShowOnMap: (location: LocationState) => void; }> = ({ result, onLearnMore, onShowOnMap }) => {
+const ImageResultDisplay: React.FC<{ 
+    result: MultiItemAnalysisResult; 
+    onLearnMore: (fact: string) => void; 
+    onShowOnMap: (location: LocationState) => void;
+    audioState: AnalysisDisplayProps['audioState'];
+    onToggleAudio: AnalysisDisplayProps['onToggleAudio'];
+}> = ({ result, onLearnMore, onShowOnMap, audioState, onToggleAudio }) => {
     const { t } = useI18n();
     const itemCount = result.items.length;
 
@@ -154,7 +225,13 @@ const ImageResultDisplay: React.FC<{ result: MultiItemAnalysisResult; onLearnMor
                         className="animate-slide-up-fade" 
                         style={{ animationDelay: `${100 + index * 100}ms` }}
                     >
-                        <ItemResultCard item={item} onLearnMore={onLearnMore} />
+                        <ItemResultCard 
+                            item={item} 
+                            itemId={`${item.itemName}-${index}`}
+                            onLearnMore={onLearnMore} 
+                            audioState={audioState}
+                            onToggleAudio={onToggleAudio}
+                        />
                     </div>
                 ))}
             </div>
@@ -209,7 +286,7 @@ const TextResultDisplay: React.FC<{ result: TextAnalysisResult; onLearnMore: (fa
     </div>
 )};
 
-export const AnalysisDisplay: React.FC<AnalysisDisplayProps> = ({ result, isLoading, onLearnMore, onShowOnMap }) => {
+export const AnalysisDisplay: React.FC<AnalysisDisplayProps> = ({ result, isLoading, onLearnMore, onShowOnMap, audioState, onToggleAudio }) => {
   const { t } = useI18n();
   const renderContent = () => {
     if (isLoading) {
@@ -218,7 +295,7 @@ export const AnalysisDisplay: React.FC<AnalysisDisplayProps> = ({ result, isLoad
     
     if (result) {
         if (result.queryType === 'image') {
-            return <ImageResultDisplay result={result} onLearnMore={onLearnMore} onShowOnMap={onShowOnMap} />;
+            return <ImageResultDisplay result={result} onLearnMore={onLearnMore} onShowOnMap={onShowOnMap} audioState={audioState} onToggleAudio={onToggleAudio} />;
         }
         if (result.queryType === 'text') {
             return <TextResultDisplay result={result} onLearnMore={onLearnMore} />;

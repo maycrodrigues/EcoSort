@@ -1,5 +1,6 @@
 
-import { GoogleGenAI, Type } from '@google/genai';
+
+import { GoogleGenAI, Type, Modality } from '@google/genai';
 import type { MultiItemAnalysisResult, SingleItemAnalysisResult, TextAnalysisResult } from '../types';
 
 if (!process.env.API_KEY) {
@@ -174,6 +175,36 @@ export const getExpandedContent = async (fact: string, i18n: I18nStrings): Promi
 
     } catch (error) {
         console.error("Gemini API educational content failed. Full error details:", error);
+        throw new Error(i18n.error);
+    }
+};
+
+
+export const generateSpeech = async (textToSpeak: string, i18n: { error: string }): Promise<string> => {
+    try {
+        const response = await ai.models.generateContent({
+            model: "gemini-2.5-flash-preview-tts",
+            contents: [{ parts: [{ text: textToSpeak }] }],
+            config: {
+                responseModalities: [Modality.AUDIO],
+                speechConfig: {
+                    voiceConfig: {
+                        prebuiltVoiceConfig: { voiceName: 'Kore' },
+                    },
+                },
+            },
+        });
+        
+        const base64Audio = response.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data;
+
+        if (!base64Audio) {
+            throw new Error("No audio data received from API.");
+        }
+
+        return base64Audio;
+
+    } catch (error) {
+        console.error("Gemini API text-to-speech failed. Full error details:", error);
         throw new Error(i18n.error);
     }
 };
