@@ -4,7 +4,7 @@ import { Header } from './components/Header';
 import { ImageUploader } from './components/ImageUploader';
 import { AnalysisDisplay } from './components/AnalysisDisplay';
 import { analyzeImage, analyzeTextQuery, getExpandedContent } from './services/geminiService';
-import { fileToBase64 } from './utils/fileUtils';
+import { fileToBase64, createImagePreview } from './utils/fileUtils';
 import { getGPSData } from './utils/exifUtils';
 import type { AnalysisResult, HistoryItem, EducationalContent } from './types';
 import { SparklesIcon, PhotoIcon, ChatBubbleLeftRightIcon } from './components/Icons';
@@ -30,7 +30,8 @@ type AnalysisMode = 'image' | 'text';
 
 const App: React.FC = () => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null); // Blob URL for performance
+  const [historyImagePreview, setHistoryImagePreview] = useState<string | null>(null); // Data URL for storage
   const [analysisResult, setAnalysisResult] = useState<AnalysisResult | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [toast, setToast] = useState<ToastState | null>(null);
@@ -70,7 +71,12 @@ const App: React.FC = () => {
         return;
       }
       setSelectedFile(file);
-      setImagePreview(URL.createObjectURL(file));
+      // Cria um Blob URL para exibição rápida e eficiente na tela
+      const blobUrl = URL.createObjectURL(file);
+      setImagePreview(blobUrl);
+       // Cria um Data URL (base64) otimizado para armazenamento no histórico
+      const dataUrl = await createImagePreview(file, 400); // Max 400px
+      setHistoryImagePreview(dataUrl);
       setAnalysisResult(null);
 
       try {
@@ -91,6 +97,7 @@ const App: React.FC = () => {
       URL.revokeObjectURL(imagePreview);
     }
     setImagePreview(null);
+    setHistoryImagePreview(null);
     setAnalysisResult(null);
     setIsLoading(false);
     setTextQuery('');
@@ -112,27 +119,22 @@ const App: React.FC = () => {
     setIsLoading(true);
     setAnalysisResult(null);
     setAnalysisStatus(t('app.ariaLive.loading'));
-    let result: AnalysisResult | null = null;
-
+    
     try {
       if (mode === 'image') {
-        if (!selectedFile) {
+        if (!selectedFile || !historyImagePreview) {
           showToast(t('toast.selectImage'), "error");
           setIsLoading(false);
           return;
         }
 
         let locationForAnalysis = location;
-        // Se a imagem não tiver GPS, tenta obter a localização do navegador
         if (!locationForAnalysis) {
           try {
             const position = await new Promise<GeolocationPosition>((resolve, reject) => {
               navigator.geolocation.getCurrentPosition(resolve, reject, { timeout: 5000 });
             });
-            locationForAnalysis = {
-              lat: position.coords.latitude,
-              lon: position.coords.longitude
-            };
+            locationForAnalysis = { lat: position.coords.latitude, lon: position.coords.longitude };
             showToast(t('toast.locationUsed'), 'info');
           } catch (geoError) {
             console.warn("Geolocalização do navegador negada ou indisponível.", geoError);
@@ -140,11 +142,23 @@ const App: React.FC = () => {
         }
 
         const { base64, mimeType } = await fileToBase64(selectedFile);
-        result = await analyzeImage(base64, mimeType, {
+        const result = await analyzeImage(base64, mimeType, {
           prompt: t('gemini.imagePrompt'),
           locationPrompt: t('gemini.locationPrompt'),
           error: t('gemini.imageError'),
         }, locationForAnalysis);
+
+        if (result) {
+          setAnalysisResult(result);
+          const newHistoryItem: HistoryItem = {
+            id: Date.now().toString(),
+            timestamp: new Date().toISOString(),
+            queryType: 'image',
+            result,
+            imagePreview: historyImagePreview,
+          };
+          setHistory([newHistoryItem, ...history]);
+        }
 
       } else { // mode === 'text'
         if (!textQuery.trim()) {
@@ -152,20 +166,22 @@ const App: React.FC = () => {
           setIsLoading(false);
           return;
         }
-        result = await analyzeTextQuery(textQuery, {
+        const result = await analyzeTextQuery(textQuery, {
           prompt: t('gemini.textPrompt'),
           error: t('gemini.textError'),
         });
-      }
-      
-      if (result) {
-        setAnalysisResult(result);
-        const newHistoryItem: HistoryItem = {
-          id: Date.now().toString(),
-          timestamp: new Date().toISOString(),
-          result: result,
-        };
-        setHistory([newHistoryItem, ...history]);
+        
+        if (result) {
+          setAnalysisResult(result);
+          const newHistoryItem: HistoryItem = {
+            id: Date.now().toString(),
+            timestamp: new Date().toISOString(),
+            queryType: 'text',
+            result,
+            originalQuery: textQuery,
+          };
+          setHistory([newHistoryItem, ...history]);
+        }
       }
 
     } catch (err) {
@@ -204,7 +220,24 @@ const App: React.FC = () => {
   }
   
   const handleSelectHistoryItem = (item: HistoryItem) => {
-    setAnalysisResult(item.result);
+    setIsLoading(false); // Garante que não está em modo de carregamento
+
+    if (item.queryType === 'image') {
+      setMode('image');
+      setImagePreview(item.imagePreview); // Restaura o preview da imagem
+      setHistoryImagePreview(item.imagePreview);
+      setAnalysisResult(item.result);
+      setTextQuery('');
+      setSelectedFile(null); // Não podemos restaurar o objeto File
+    } else { // 'text'
+      setMode('text');
+      setTextQuery(item.originalQuery); // Restaura a pergunta original
+      setAnalysisResult(item.result);
+      setImagePreview(null);
+      setHistoryImagePreview(null);
+      setSelectedFile(null);
+    }
+    
     setIsHistoryOpen(false);
   };
 

@@ -23,11 +23,27 @@ export interface TextAnalysisResult {
 
 export type AnalysisResult = MultiItemAnalysisResult | TextAnalysisResult;
 
-export interface HistoryItem {
+// Base comum para todos os itens do histórico
+interface BaseHistoryItem {
   id: string;
   timestamp: string;
-  result: AnalysisResult;
 }
+
+// Item de histórico para uma análise de imagem
+export interface ImageHistoryItem extends BaseHistoryItem {
+  queryType: 'image';
+  result: MultiItemAnalysisResult;
+  imagePreview: string; // Armazena a imagem como Data URL (base64)
+}
+
+// Item de histórico para uma consulta de texto
+export interface TextHistoryItem extends BaseHistoryItem {
+  queryType: 'text';
+  result: TextAnalysisResult;
+  originalQuery: string; // Armazena a pergunta original do usuário
+}
+
+export type HistoryItem = ImageHistoryItem | TextHistoryItem;
 
 export interface EducationalContent {
   title: string;

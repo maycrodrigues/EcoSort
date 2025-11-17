@@ -1,3 +1,4 @@
+
 import React, { useEffect, useRef } from 'react';
 import type { HistoryItem } from '../types';
 import { PhotoIcon, ChatBubbleLeftRightIcon, TrashIcon, XCircleIcon } from './Icons';
@@ -13,19 +14,19 @@ interface HistoryModalProps {
 
 const HistoryItemCard: React.FC<{ item: HistoryItem; onSelect: () => void; animationDelay: number }> = ({ item, onSelect, animationDelay }) => {
     const { t, locale } = useI18n();
-    const { result } = item;
-    const isImageQuery = result.queryType === 'image';
+    const isImageQuery = item.queryType === 'image';
     const Icon = isImageQuery ? PhotoIcon : ChatBubbleLeftRightIcon;
     
     let title = '';
-    if (result.queryType === 'image') {
+    if (item.queryType === 'image') {
+        const { result } = item;
         if (result.items.length > 0) {
             title = result.items.map(i => i.itemName).join(', ');
         } else {
             title = t('history.imageAnalysisNoItems');
         }
     } else {
-        title = result.question;
+        title = item.originalQuery;
     }
 
     return (

@@ -1,6 +1,11 @@
-// @ts-nocheck - ExifReader is loaded from a script tag and won't be found by TypeScript
-// Declara ExifReader para que o TypeScript saiba que ele existe no escopo global
-declare const ExifReader: any;
+
+// Informa ao TypeScript que a propriedade ExifReader existirá no objeto global window.
+// Isso é necessário porque a biblioteca é carregada via uma tag <script> no HTML.
+declare global {
+  interface Window {
+    ExifReader: any;
+  }
+}
 
 /**
  * Extrai dados de GPS (latitude e longitude) dos metadados EXIF de um arquivo de imagem.
@@ -8,8 +13,14 @@ declare const ExifReader: any;
  * @returns Uma promessa que resolve para um objeto com lat e lon, ou null se não houver dados de GPS.
  */
 export const getGPSData = async (file: File): Promise<{ lat: number; lon: number } | null> => {
+  // Verificação de segurança para garantir que a biblioteca foi carregada.
+  if (typeof window.ExifReader === 'undefined') {
+    console.error("ExifReader library is not available on the window object. Please ensure it's loaded correctly.");
+    return null;
+  }
+  
   try {
-    const tags = await ExifReader.load(file);
+    const tags = await window.ExifReader.load(file);
 
     const latTag = tags['GPSLatitude'];
     const lonTag = tags['GPSLongitude'];
@@ -24,7 +35,9 @@ export const getGPSData = async (file: File): Promise<{ lat: number; lon: number
 
     return null;
   } catch (error) {
-    console.error("Erro ao ler dados EXIF:", error);
+    // A biblioteca pode lançar erros para arquivos sem metadados ou corrompidos.
+    // Tratamos isso graciosamente em vez de quebrar a aplicação.
+    console.warn("Could not read EXIF data from the image. It might be missing or corrupted.", error);
     return null;
   }
 };
