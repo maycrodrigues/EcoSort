@@ -35,22 +35,22 @@ const HistoryItemCard: React.FC<{ item: HistoryItem; onSelect: () => void; anima
     const renderStatus = () => {
         if (item.syncStatus === 'pending') {
             return (
-                <div className="flex items-center gap-1 text-xs text-yellow-600 dark:text-yellow-400">
-                    <CloudArrowUpIcon className="w-4 h-4" />
-                    <span>{t('history.status.pending')}</span>
+                <div className="flex items-center gap-1 text-xs text-yellow-600 dark:text-yellow-400 mt-1">
+                    <CloudArrowUpIcon className="w-5 h-5" />
+                    <span className="font-semibold">{t('history.status.pending')}</span>
                 </div>
             );
         }
         if (item.syncStatus === 'error') {
             return (
-                <div className="flex items-center gap-1 text-xs text-red-600 dark:text-red-400">
-                    <ExclamationCircleIcon className="w-4 h-4" />
-                    <span>{t('history.status.error')}</span>
+                <div className="flex items-center gap-1 text-xs text-red-600 dark:text-red-400 mt-1">
+                    <ExclamationCircleIcon className="w-5 h-5" />
+                    <span className="font-semibold">{t('history.status.error')}</span>
                 </div>
             );
         }
         return (
-            <p className="text-xs text-gray-500 dark:text-gray-400">
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                 {new Date(item.timestamp).toLocaleString(locale.replace('_', '-'))}
             </p>
         );
@@ -59,7 +59,7 @@ const HistoryItemCard: React.FC<{ item: HistoryItem; onSelect: () => void; anima
     return (
         <button 
             onClick={onSelect}
-            className="w-full flex items-center p-3 text-left bg-gray-50 dark:bg-gray-700/50 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-all duration-200 hover:scale-[1.02] hover:shadow-sm disabled:opacity-60 disabled:cursor-not-allowed disabled:transform-none animate-slide-up-fade"
+            className="w-full flex items-center p-3 text-left bg-gray-50 dark:bg-gray-700/50 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-all duration-200 hover:scale-[1.02] hover:shadow-sm animate-slide-up-fade"
             style={{ animationDelay: `${animationDelay}ms`, opacity: 0 }} // opacity 0 for animation start
         >
             <Icon className="w-6 h-6 mr-4 text-brand-secondary dark:text-gray-400 flex-shrink-0" />
